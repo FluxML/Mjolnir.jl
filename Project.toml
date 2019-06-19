@@ -2,3 +2,7 @@ name = "Poirot"
 uuid = "8990bfda-9252-11e9-3647-47bd69460edd"
 authors = ["Mike J Innes <mike.j.innes@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"

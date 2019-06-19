@@ -1,5 +1,6 @@
 module Poirot
 
-greet() = print("Hello World!")
+using Reexport
+@reexport using Distributions
 
 end # module
