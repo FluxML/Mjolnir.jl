@@ -1,6 +1,10 @@
 module Poirot
 
-using Reexport
-@reexport using Distributions
+export Sample, Rejection, ABC
+
+include("distributions.jl")
+
+include("inference/rejection.jl")
+include("inference/abc.jl")
 
 end # module
