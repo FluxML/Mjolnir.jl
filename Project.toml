@@ -1,0 +1,4 @@
+name = "Poirot"
+uuid = "8990bfda-9252-11e9-3647-47bd69460edd"
+authors = ["Mike J Innes <mike.j.innes@gmail.com>"]
+version = "0.1.0"
