@@ -1,5 +1,5 @@
 using IRTools
-using IRTools: IR, Variable, block, blocks, arguments, isexpr, var
+using IRTools: IR, Variable, block, blocks, arguments, isexpr
 
 struct Partial{T}
   value

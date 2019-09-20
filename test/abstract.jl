@@ -1,5 +1,6 @@
 using Poirot, IRTools, Test
-using Poirot: Const, Partial, interpreter, var, run!, return_type
+using Poirot: Const, Partial, interpreter, run!, return_type
+using IRTools: var
 
 ir = @code_ir identity(1)
 @test return_type(ir, nothing, Int) == Int
