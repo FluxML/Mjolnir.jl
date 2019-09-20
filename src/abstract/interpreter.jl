@@ -1,5 +1,5 @@
 using IRTools
-using IRTools: IR, Variable, block, blocks, arguments
+using IRTools: IR, Variable, block, blocks, arguments, isexpr, var
 
 struct Partial{T}
   value
@@ -9,6 +9,8 @@ struct Const{T}
   value::T
 end
 
+const AType{T} = Union{Type{T},Const{T},Partial{T}}
+
 mutable struct Interpreter
   ir::IR
   ip::Base.Tuple{Int,Int}
@@ -16,14 +18,13 @@ mutable struct Interpreter
   stmts::Vector{Vector{Variable}}
 end
 
-function Interpreter(ir, args...)
+function interpreter(ir, args...)
   env = Dict(zip(arguments(block(ir, 1)), args))
   Interpreter(ir, (1, 1), env, keys.(blocks(ir)))
 end
 
-lookup(it, v) = v
+lookup(it, v::GlobalRef) = Const(getproperty(v.mod, v.name))
 lookup(it, v::Variable) = it.env[v]
-lookup(it, v::Symbol) = haskey(main, v) ? main[v] : error("$v not defined")
 
 function step!(it::Interpreter)
   b, st = it.ip
@@ -51,7 +52,7 @@ end
 function eval_stmt(it::Interpreter, ex)
   if isexpr(ex, :call)
     args = map(x -> lookup(it, x), ex.args)
-    vinvoke(args...)
+    partial(args...)
   else
     error("Unrecognised expression $(ex.head)")
   end
@@ -62,4 +63,4 @@ function run!(it::Interpreter)
   return r
 end
 
-interpret(ir::IR, args...) = run!(Interpreter(ir, args...))
+return_type(ir::IR, args...) = run!(interpreter(ir, args...))
