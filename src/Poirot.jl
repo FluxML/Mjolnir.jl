@@ -2,6 +2,9 @@ module Poirot
 
 export Sample, Rejection, ABC
 
+include("abstract/interpreter.jl")
+include("abstract/base.jl")
+
 include("distributions.jl")
 
 include("inference/rejection.jl")

@@ -5,4 +5,11 @@ version = "0.1.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+IRTools = "7869d1d1-7146-5819-86e3-90919afe41df"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
