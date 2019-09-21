@@ -1,5 +1,6 @@
 using IRTools
-using IRTools: IR, Variable, block, blocks, arguments, argtypes, isexpr, stmt
+using IRTools: IR, Variable, block, blocks, arguments, argtypes, isexpr, stmt,
+  branches, isreturn, returnvalue
 
 struct Partial{T}
   value
@@ -25,6 +26,16 @@ function prepare_ir!(ir)
     end
   end
   return ir
+end
+
+function blockargs!(b, args)
+  changed = false
+  for i = 1:length(argtypes(b))
+    args[i] != argtypes(b)[i] || continue
+    argtypes(b)[i] = _union(argtypes(b)[i], args[i])
+    changed = true
+  end
+  return changed
 end
 
 mutable struct Frame
@@ -53,6 +64,9 @@ function infercall!(inf, fr, ex)
   partial(exprtype.((fr.ir,), ex.args)...)
 end
 
+openbranches(b) =
+  filter(br -> exprtype(b.ir, br.condition) != Const(true), branches(b))
+
 function step!(inf::Inference)
   frame, block, ip = pop!(inf.queue)
   if ip <= length(frame.stmts[block])
@@ -65,10 +79,17 @@ function step!(inf::Inference)
     push!(inf.queue, (frame, block, ip+1))
   else
     block = IRTools.block(frame.ir, block)
-    if IRTools.isreturn(block)
-      T = exprtype(frame.ir, IRTools.returnvalue(block))
-      T == frame.rettype && return
-      frame.rettype = _union(frame.rettype, T)
+    for br in openbranches(block)
+      if isreturn(br)
+        T = exprtype(frame.ir, IRTools.returnvalue(block))
+        T == frame.rettype && return
+        frame.rettype = _union(frame.rettype, T)
+      else
+        args = exprtype.((frame.ir,), arguments(br))
+        if blockargs!(IRTools.block(frame.ir, br.block), args)
+          push!(inf.queue, (frame, br.block, 1))
+        end
+      end
     end
   end
   return
