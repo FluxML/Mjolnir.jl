@@ -1,6 +1,6 @@
 using IRTools
 using IRTools: IR, Variable, block, blocks, arguments, argtypes, isexpr, stmt,
-  branches, isreturn, returnvalue
+  branches, isreturn, returnvalue, argument!, return!
 
 struct Partial{T}
   value
@@ -60,7 +60,8 @@ struct Inference
   queue::WorkQueue{Any}
 end
 
-exprtype(ir, x) = IRTools.exprtype(ir, x)
+exprtype(ir, x::Variable) = IRTools.exprtype(ir, x)
+exprtype(ir, x::Union{Number,String}) = Const(x)
 exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
 function infercall!(inf, loc, ex)
@@ -77,8 +78,17 @@ function infercall!(inf, loc, ex)
   return fr.rettype
 end
 
-openbranches(b) =
-  filter(br -> exprtype(b.ir, br.condition) != Const(true), branches(b))
+function openbranches(bl)
+  brs = []
+  for br in branches(bl)
+    br.condition == nothing && (push!(brs, br); break)
+    cond = exprtype(bl.ir, br.condition)
+    cond == Const(true) && continue
+    cond == Const(false) && (push!(brs, br); break)
+    push!(brs, br)
+  end
+  return brs
+end
 
 function step!(inf::Inference)
   frame, block, ip = pop!(inf.queue)

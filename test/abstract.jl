@@ -1,5 +1,5 @@
 using Poirot, IRTools, Test
-using Poirot: Const, Partial, Inference, return_type
+using Poirot: Const, Partial, Inference, return_type, trace
 using IRTools: var
 
 ir = @code_ir identity(1)
@@ -45,3 +45,13 @@ fact(n) = n == 0 ? 1 : n*fact(n-1)
 
 ir = @code_ir fact(1)
 @test return_type(ir, Nothing, Int) == Int
+
+# Tracing
+
+tr = trace(typeof(pow), Int, Const(3))
+@test length(tr.blocks) == 1
+@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.block(tr, 1))) == Int
+
+tr = trace(typeof(pow), Const(2), Const(3))
+@test length(tr.blocks) == 1
+@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.block(tr, 1))) == Const(8)
