@@ -1,7 +1,3 @@
-using IRTools
-using IRTools: IR, Variable, block, blocks, arguments, argtypes, isexpr, stmt,
-  branches, isreturn, returnvalue, argument!, return!
-
 struct Partial{T}
   value
 end

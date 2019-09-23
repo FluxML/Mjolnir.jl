@@ -1,5 +1,5 @@
-using Poirot, IRTools, Test
-using Poirot: Const, Partial, Inference, return_type, trace
+using Poirot.Abstract, IRTools, Test
+using Poirot.Abstract: Const, Partial, Inference, return_type, trace
 using IRTools: var
 
 ir = @code_ir identity(1)
