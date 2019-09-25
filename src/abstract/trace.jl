@@ -45,6 +45,7 @@ function extract_group(bl)
   for b in blocks(out), (i, br) in enumerate(branches(b))
     branches(b)[i] = IRTools.Branch(br, block = bmap[br.block])
   end
+  IRTools.domorder!(out)
   return out, args, after
 end
 
