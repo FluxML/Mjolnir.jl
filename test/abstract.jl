@@ -1,6 +1,6 @@
 using Poirot.Abstract, IRTools, Test
 using Poirot.Abstract: Const, Partial, Inference, return_type, trace
-using IRTools: var
+using IRTools: var, returntype
 
 ir = @code_ir identity(1)
 @test return_type(ir, Nothing, Int) == Int
@@ -50,14 +50,14 @@ ir = @code_ir fact(1)
 
 tr = trace(typeof(pow), Int, Const(3))
 @test length(tr.blocks) == 1
-@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.block(tr, 1))) == Int
+@test returntype(IRTools.block(tr, 1)) == Int
 
 tr = trace(typeof(pow), Const(2), Const(3))
 @test length(tr.blocks) == 1
-@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.block(tr, 1))) == Const(8)
+@test returntype(IRTools.block(tr, 1)) == Const(8)
 
 tr = trace(typeof(pow), Const(2), Int)
-@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.blocks(tr)[end])) == Int
+@test returntype(IRTools.blocks(tr)[end]) == Int
 
 tr = trace(typeof(pow), Const(2.0), Int)
-@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.blocks(tr)[end])) == Union{Float64,Int}
+@test returntype(IRTools.blocks(tr)[end]) == Union{Float64,Int}
