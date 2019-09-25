@@ -1,6 +1,6 @@
 module Abstract
 
-using IRTools
+using IRTools, MacroTools
 using IRTools: IR, CFG, Variable, block, blocks, arguments, argtypes, isexpr,
   stmt, branches, isreturn, returnvalue, argument!, return!
 

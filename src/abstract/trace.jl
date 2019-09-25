@@ -127,3 +127,11 @@ function trace(Ts...)
   return!(tr, trace!(tr, ir, args))
   return tr
 end
+
+atype(T::AType) = T
+atype(x) = Const(x)
+
+macro trace(ex)
+  @capture(ex, f_(args__)) || error("@trace f(args...)")
+  :(trace(atype.(($(esc(f)), $(esc.(args)...)))...))
+end
