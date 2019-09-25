@@ -27,7 +27,7 @@ end
 function extract_group(bl)
   out = IR()
   args = union(arguments.(branches(block(bl.ir, bl.id)))...)
-  args = union(args, filter(!=(nothing), map(x -> x.condition, branches(block(bl.ir, bl.id)))))
+  args = union(args, filter(x -> x != nothing, map(x -> x.condition, branches(block(bl.ir, bl.id)))))
   innerargs = Dict(a => argument!(out, Union{}) for a in args)
   for br in branches(block(bl.ir, bl.id))
     push!(branches(block(out, 1)), rename(innerargs, br))
