@@ -55,3 +55,9 @@ tr = trace(typeof(pow), Int, Const(3))
 tr = trace(typeof(pow), Const(2), Const(3))
 @test length(tr.blocks) == 1
 @test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.block(tr, 1))) == Const(8)
+
+tr = trace(typeof(pow), Const(2), Int)
+@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.blocks(tr)[end])) == Int
+
+tr = trace(typeof(pow), Const(2.0), Int)
+@test IRTools.exprtype(tr, IRTools.returnvalue(IRTools.blocks(tr)[end])) == Union{Float64,Int}
