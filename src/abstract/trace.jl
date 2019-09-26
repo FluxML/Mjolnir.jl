@@ -1,5 +1,20 @@
 rename(env, ex) = IRTools.prewalk(x -> x isa Variable ? env[x] : x, ex)
 
+function inline_consts!(ir::IR)
+  env = Dict()
+  for (v, st) in ir
+    if st.type isa Const
+      delete!(ir, v)
+      env[v] = st.type.value
+    else
+      env[v] = v
+    end
+  end
+  return IRTools.prewalk!(x -> get(env, x, x), ir)
+end
+
+cleanup!(ir) = ir |> inline_consts! |> IRTools.prune! |> IRTools.renumber
+
 function copyblock!(ir::IR, b)
   c = IRTools.block!(ir)
   env = Dict()
@@ -126,7 +141,7 @@ function trace(Ts...)
   tr = IR()
   args = [argument!(tr, T) for T in Ts]
   return!(tr, trace!(tr, ir, args))
-  return tr
+  return cleanup!(tr)
 end
 
 atype(T::AType) = T
