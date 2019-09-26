@@ -65,7 +65,7 @@ function extract_group(bl)
 end
 
 function inline!(out, ir, args)
-  env = Dict(k => v for (k, v) in zip(arguments(ir), args))
+  env = Dict(zip(arguments(ir), args))
   before = blocks(out)[end]
   for br in branches(block(ir, 1))
     push!(branches(before), rename(env, br))

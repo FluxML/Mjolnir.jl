@@ -59,6 +59,22 @@ function frame(ir::IR, args...)
   return Frame(ir)
 end
 
+function inline_bbs!(fr)
+  for b in blocks(fr.ir)
+    while !isempty(fr.inlined[b.id])
+      follow = popfirst!(fr.inlined[b.id])
+      @assert length(openbranches(b)) == 1
+      args = arguments(openbranches(b)[1])
+      env = Dict(zip(arguments(follow), args))
+      for (v, st) in follow
+        env[v] = push!(b, rename(env, st))
+      end
+      empty!(branches(b))
+      append!(branches(b), rename.((env,), branches(block(follow, 1))))
+    end
+  end
+end
+
 struct Inference
   frames::Dict{Vector{AType},Frame}
   queue::WorkQueue{Any}
@@ -126,6 +142,7 @@ function step!(inf::Inference)
       else
         args = exprtype.((block.ir,), arguments(br))
         if blockargs!(IRTools.block(frame.ir, br.block), args)
+          empty!(frame.inlined[br.block])
           push!(inf.queue, (frame, br.block, 0, 1))
         end
       end
@@ -137,6 +154,10 @@ end
 function infer!(inf::Inference)
   while !isempty(inf.queue)
     step!(inf)
+  end
+  for (_, fr) in inf.frames
+    inline_bbs!(fr)
+    fr.ir |> IRTools.trimblocks!
   end
   return inf
 end
@@ -154,7 +175,7 @@ function infer!(ir::IR, args...)
 end
 
 function return_type(ir::IR, args...)
-  fr = frame(ir, args...)
+  fr = frame(copy(ir), args...)
   inf = Inference(fr)
   infer!(inf)
   return fr.rettype
