@@ -8,6 +8,8 @@ end
 
 const AType{T} = Union{Type{T},Const{T},Partial{T}}
 
+Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
+
 widen(::AType{T}) where T = T
 
 _union(::Type{Union{}}, T) = T
@@ -36,14 +38,20 @@ function blockargs!(b, args)
   return changed
 end
 
+# TODO clean up edges when blocks are reset
 mutable struct Frame
   ir::IR
+  inlined::Vector{Vector{IR}}
   edges::Vector{Any}
   stmts::Vector{Vector{Variable}}
   rettype::AType
 end
 
-Frame(ir::IR) = Frame(ir, [], keys.(blocks(ir)), Union{})
+getblock(fr::Frame, b, follow) =
+  follow == 0 ? (block(fr.ir, b), fr.stmts[b]) :
+    (block(fr.inlined[b][follow], 1), keys(fr.inlined[b][follow]))
+
+Frame(ir::IR) = Frame(ir, [IR[] for _ = 1:length(blocks(ir))], [], keys.(blocks(ir)), Union{})
 
 function frame(ir::IR, args...)
   prepare_ir!(ir)
@@ -60,18 +68,25 @@ exprtype(ir, x::Variable) = IRTools.exprtype(ir, x)
 exprtype(ir, x::Union{Number,String}) = Const(x)
 exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
-function infercall!(inf, loc, ex)
-  Ts = exprtype.((loc[1].ir,), ex.args)
+function infercall!(inf, loc, block, ex)
+  Ts = exprtype.((block.ir,), ex.args)
   applicable(partial, Ts...) && return partial(Ts...)
   ir = IR(widen.(Ts)...)
   if !haskey(inf.frames, Ts)
     fr = inf.frames[Ts] = frame(IR(widen.(Ts)...), Ts...)
-    push!(inf.queue, (fr, 1, 1))
+    push!(inf.queue, (fr, 1, 0, 1))
   else
     fr = inf.frames[Ts]
   end
   push!(fr.edges, loc)
   return fr.rettype
+end
+
+function inferbranch!(inf, fr, block, follow, br)
+  ir = IR(IRTools.block(fr.ir, br.block))
+  argtypes(ir) .= exprtype.((getblock(fr, block, follow)[1].ir,), arguments(br))
+  push!(fr.inlined[block], ir)
+  push!(inf.queue, (fr, block, follow+1, 1))
 end
 
 function openbranches(bl)
@@ -87,29 +102,31 @@ function openbranches(bl)
 end
 
 function step!(inf::Inference)
-  frame, block, ip = pop!(inf.queue)
-  if ip <= length(frame.stmts[block])
-    var = frame.stmts[block][ip]
-    st = frame.ir[var]
+  frame, b, f, ip = pop!(inf.queue)
+  block, stmts = getblock(frame, b, f)
+  if ip <= length(stmts)
+    var = stmts[ip]
+    st = block[var]
     if isexpr(st.expr, :call)
-      T = infercall!(inf, (frame, block, ip), st.expr)
+      T = infercall!(inf, (frame, b, f, ip), block, st.expr)
       if T != Union{}
-        frame.ir[var] = stmt(frame.ir[var], type = _union(st.type, T))
-        push!(inf.queue, (frame, block, ip+1))
+        block.ir[var] = stmt(block[var], type = _union(st.type, T))
+        push!(inf.queue, (frame, b, f, ip+1))
       end
     end
+  elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1]))
+    inferbranch!(inf, frame, b, f, brs[1])
   else
-    block = IRTools.block(frame.ir, block)
-    for br in openbranches(block)
+    for br in brs
       if isreturn(br)
-        T = exprtype(frame.ir, IRTools.returnvalue(block))
+        T = exprtype(block.ir, IRTools.returnvalue(block))
         _issubtype(T, frame.rettype) && return
         frame.rettype = _union(frame.rettype, T)
         foreach(loc -> push!(inf.queue, loc), frame.edges)
       else
-        args = exprtype.((frame.ir,), arguments(br))
+        args = exprtype.((block.ir,), arguments(br))
         if blockargs!(IRTools.block(frame.ir, br.block), args)
-          push!(inf.queue, (frame, br.block, 1))
+          push!(inf.queue, (frame, br.block, 0, 1))
         end
       end
     end
@@ -126,7 +143,7 @@ end
 
 function Inference(fr::Frame)
   q = WorkQueue{Any}()
-  push!(q, (fr, 1, 1))
+  push!(q, (fr, 1, 0, 1))
   Inference(Dict(argtypes(fr.ir)=>fr), q)
 end
 

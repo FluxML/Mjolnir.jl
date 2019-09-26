@@ -32,8 +32,9 @@ end
 
 ir = @code_ir pow(2, 3)
 @test return_type(ir, Nothing, Int64, Const(5)) == Int
-@test return_type(ir, Nothing, Float64, Const(5)) == Union{Float64, Int}
-@test_broken return_type(ir, Nothing, Const(2), Const(3)) == Const(8)
+@test return_type(ir, Nothing, Float64, Int) == Union{Float64, Int}
+@test return_type(ir, Nothing, Float64, Const(5)) == Float64
+@test return_type(ir, Nothing, Const(2), Const(3)) == Const(8)
 
 foo(a, b) = a + b
 bar(a, b) = foo(a, b)
