@@ -61,6 +61,5 @@ tr = @trace pow(2, Int)
 tr = @trace pow(2.0, Int)
 @test exprtype(tr, returnvalue(IRTools.blocks(tr)[end])) == Union{Float64,Int}
 
-# TODO pruning is broken on this example
 tr = @trace pow(1, Int)
 @test exprtype(tr, returnvalue(IRTools.blocks(tr)[end])) == Const(1)
