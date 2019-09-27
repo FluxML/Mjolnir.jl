@@ -23,4 +23,11 @@ end
 # Partial
 
 partial(::AType{Type{Ref{T}}}) where T =
-  Partial{Ref{T}}(Ref{Any})
+  Partial{Ref{T}}(Ref{AType}())
+
+function partial(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
+  R.value[] = x
+  return R
+end
+
+partial(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]

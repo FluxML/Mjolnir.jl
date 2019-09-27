@@ -7,7 +7,11 @@ struct Const{T}
   Const(x) = new{Core.Typeof(x)}(x)
 end
 
-const AType{T} = Union{Type{T},Const{T},Partial{T}}
+struct Node{T}
+  value::Variable
+end
+
+const AType{T} = Union{Type{T},Const{T},Partial{T},Node{T}}
 
 Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 

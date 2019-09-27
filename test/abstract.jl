@@ -68,3 +68,15 @@ tr = @trace pow(1, Int)
 
 tr = @trace bar(Int, Int)
 @test returntype(tr) == Int
+
+function foo(x)
+  r = Ref{Any}()
+  r[] = x
+  return r[]
+end
+
+tr = @trace foo(1)
+@test returntype(tr) == Const(1)
+
+tr = @trace foo(Int)
+@test returntype(tr) == Int
