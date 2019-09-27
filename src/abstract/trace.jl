@@ -112,7 +112,7 @@ function traceblock!(out, env, bl)
       if (T = partial(Ts...)) != nothing
         env[k] = push!(out, stmt(rename(env, v.expr), type = T))
       else
-        error("Call not yet implemented")
+        env[k] = tracecall!(out, ex.args, Ts)
       end
     end
   end
@@ -135,11 +135,15 @@ function trace!(out, ir, args)
   end
 end
 
-function trace(Ts...)
+function tracecall!(tr, args, Ts)
   ir = prepare_ir!(IR(widen.(Ts)...))
+  trace!(tr, ir, args)
+end
+
+function trace(Ts...)
   tr = IR()
   args = [argument!(tr, T) for T in Ts]
-  return!(tr, trace!(tr, ir, args))
+  return!(tr, tracecall!(tr, args, Ts))
   return cleanup!(tr)
 end
 

@@ -47,19 +47,24 @@ ir = @code_ir fact(1)
 
 # Tracing
 
+returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
+
 tr = @trace pow(Int, 3)
 @test length(tr.blocks) == 1
-@test exprtype(tr, returnvalue(IRTools.block(tr, 1))) == Int
+@test returntype(tr) == Int
 
 tr = @trace pow(2, 3)
 @test length(tr.blocks) == 1
-@test exprtype(tr, returnvalue(IRTools.block(tr, 1))) == Const(8)
+@test returntype(tr) == Const(8)
 
 tr = @trace pow(2, Int)
-@test exprtype(tr, returnvalue(IRTools.blocks(tr)[end])) == Int
+@test returntype(tr) == Int
 
 tr = @trace pow(2.0, Int)
-@test exprtype(tr, returnvalue(IRTools.blocks(tr)[end])) == Union{Float64,Int}
+@test returntype(tr) == Union{Float64,Int}
 
 tr = @trace pow(1, Int)
-@test exprtype(tr, returnvalue(IRTools.blocks(tr)[end])) == Const(1)
+@test returntype(tr) == Const(1)
+
+tr = @trace bar(Int, Int)
+@test returntype(tr) == Int
