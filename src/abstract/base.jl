@@ -1,3 +1,5 @@
+partial(Ts...) = nothing
+
 for op in :[+, -, *, /].args
   @eval partial(::AType{typeof($op)}, ::AType{S}, ::AType{T}) where {S<:Number,T<:Number} =
           promote_type(S, T)

@@ -86,7 +86,8 @@ exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
-  applicable(partial, Ts...) && return partial(Ts...)
+  T = partial(Ts...)
+  T == nothing || return T
   ir = IR(widen.(Ts)...)
   if !haskey(inf.frames, Ts)
     fr = inf.frames[Ts] = frame(IR(widen.(Ts)...), Ts...)

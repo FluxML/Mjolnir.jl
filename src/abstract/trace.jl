@@ -109,8 +109,7 @@ function traceblock!(out, env, bl)
     ex = v.expr
     if isexpr(ex, :call)
       Ts = map(v -> exprtype(out, get(env, v, v)), ex.args)
-      if applicable(partial, Ts...)
-        T = partial(Ts...)
+      if (T = partial(Ts...)) != nothing
         env[k] = push!(out, stmt(rename(env, v.expr), type = T))
       else
         error("Call not yet implemented")
