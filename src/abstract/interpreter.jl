@@ -4,6 +4,7 @@ end
 
 struct Const{T}
   value::T
+  Const(x) = new{Core.Typeof(x)}(x)
 end
 
 const AType{T} = Union{Type{T},Const{T},Partial{T}}
@@ -83,10 +84,11 @@ end
 exprtype(ir, x::Variable) = IRTools.exprtype(ir, x)
 exprtype(ir, x::Union{Number,String}) = Const(x)
 exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
+exprtype(ir, x::QuoteNode) = Const(x.value)
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
-  T = partial(Ts...)
+  T = abstract(Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
   if !haskey(inf.frames, Ts)
