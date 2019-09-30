@@ -126,6 +126,12 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[ProgressMeter]]
+deps = ["Distributed", "Printf"]
+git-tree-sha1 = "fab12b19f198dd148ca467ac4e4f12ecd0241819"
+uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
+version = "1.1.0"
+
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra", "Test"]
 git-tree-sha1 = "3ce467a8e76c6030d4c3786e7d3a73442017cdc0"

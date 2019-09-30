@@ -6,4 +6,8 @@ using Poirot, Test
   include("abstract.jl")
 end
 
+@testset "Inference" begin
+  include("inference.jl")
+end
+
 end
