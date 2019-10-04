@@ -7,6 +7,6 @@ using IRTools: IR, CFG, Variable, block, blocks, arguments, argtypes, isexpr,
 include("utils.jl")
 include("flow.jl")
 include("trace.jl")
-include("base.jl")
+include("lib/base.jl")
 
 end
