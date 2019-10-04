@@ -3,6 +3,9 @@ partial(Ts...) = abstract(Ts...)
 
 # Abstract
 
+abstract(::AType{typeof(getfield)}, m::Const{Module}, f::Const{Symbol}) =
+  Const(getfield(m.value, f.value))
+
 abstract(::AType{typeof(Core.apply_type)}, Ts::Const...) =
   Const(Core.apply_type(map(T -> T.value, Ts)...))
 
@@ -31,3 +34,10 @@ function partial(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
 end
 
 partial(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]
+
+abstract(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]
+
+function abstract(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
+  R.value[] = _union(R.value[], x)
+  return R
+end

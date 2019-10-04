@@ -8,5 +8,6 @@ include("utils.jl")
 include("flow.jl")
 include("trace.jl")
 include("lib/base.jl")
+include("lib/random.jl")
 
 end

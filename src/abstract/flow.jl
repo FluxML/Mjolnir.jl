@@ -18,6 +18,7 @@ Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 widen(::AType{T}) where T = T
 
 _union(::Type{Union{}}, T) = T
+_union(S::Const, T::Const) = S == T ? S : Union{widen(S),widen(T)}
 _union(S, T) = Union{widen(S), widen(T)}
 _issubtype(S, T::Type) = widen(S) <: T
 _issubtype(S, T) = S == T
@@ -95,8 +96,9 @@ function infercall!(inf, loc, block, ex)
   T = abstract(Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
+  ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   if !haskey(inf.frames, Ts)
-    fr = inf.frames[Ts] = frame(IR(widen.(Ts)...), Ts...)
+    fr = inf.frames[Ts] = frame(ir, Ts...)
     push!(inf.queue, (fr, 1, 0, 1))
   else
     fr = inf.frames[Ts]

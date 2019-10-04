@@ -122,6 +122,8 @@ function traceblock!(out, env, bl)
       else
         env[k] = tracecall!(out, ex.args, Ts)
       end
+    elseif isexpr(ex)
+      error("Can't trace through $(ex.head) expression")
     end
   end
 end
@@ -144,7 +146,9 @@ function trace!(out, ir, args)
 end
 
 function tracecall!(tr, args, Ts)
-  ir = prepare_ir!(IR(widen.(Ts)...))
+  ir = IR(widen.(Ts)...)
+  ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
+  ir = prepare_ir!(ir)
   trace!(tr, ir, args)
 end
 

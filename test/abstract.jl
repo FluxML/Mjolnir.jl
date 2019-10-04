@@ -80,3 +80,18 @@ tr = @trace foo(1)
 
 tr = @trace foo(Int)
 @test returntype(tr) == Int
+
+function foo(x)
+  r = Ref{Any}()
+  r[] = x
+  if rand(Bool)
+    r[] = 1
+  end
+  return r[]
+end
+
+tr = @trace foo(1)
+@test returntype(tr) == Const(1)
+
+tr = @trace foo(2)
+@test returntype(tr) == Int
