@@ -11,7 +11,7 @@ export infer, observe
 include("abstract/Abstract.jl")
 using .Abstract
 
-include("inference/empirical.jl")
+include("inference/distributions.jl")
 include("inference/inference.jl")
 include("inference/rejection.jl")
 
