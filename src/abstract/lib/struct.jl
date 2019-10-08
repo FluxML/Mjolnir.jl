@@ -31,9 +31,13 @@ end
 
 # TODO: in the abstract interpreter, mutable data should have backedges
 
-abstract(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]
+function abstract(::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+  i = findfirst(f -> f == name.value, fieldnames(T))
+  x.value[i] = _union(x.value[i], s)
+  x
+end
 
-function abstract(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
-  R.value[] = _union(R.value[], x)
-  return R
+function abstract(::AType{typeof(getfield)}, x::Partial{T}, name) where T
+  i = findfirst(f -> f == name.value, fieldnames(T))
+  x.value[i]
 end
