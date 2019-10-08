@@ -1,8 +1,3 @@
-abstract(Ts...) = nothing
-partial(Ts...) = abstract(Ts...)
-
-# Abstract
-
 abstract(::AType{typeof(getfield)}, m::Const{Module}, f::Const{Symbol}) =
   Const(getfield(m.value, f.value))
 
@@ -21,23 +16,4 @@ for op in :[>, >=, <, <=, ==, !=].args
           Bool
   @eval abstract(::AType{typeof($op)}, a::Const{<:Number}, b::Const{<:Number}) =
           Const($op(a.value, b.value))
-end
-
-# Partial
-
-partial(::AType{Type{Ref{T}}}) where T =
-  Partial{Ref{T}}(Ref{AType}())
-
-function partial(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
-  R.value[] = x
-  return R
-end
-
-partial(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]
-
-abstract(::AType{typeof(getindex)}, R::Partial{<:Ref}) = R.value[]
-
-function abstract(::AType{typeof(setindex!)}, R::Partial{<:Ref}, x::AType)
-  R.value[] = _union(R.value[], x)
-  return R
 end
