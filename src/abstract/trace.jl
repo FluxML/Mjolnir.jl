@@ -112,7 +112,7 @@ function traceblock!(out, env, bl)
   for (k, v) in bl
     ex = v.expr
     if isexpr(ex, :call)
-      Ts = map(v -> nodetype(out, get(env, v, v)), ex.args)
+      Ts = map(v -> nodetype(out, rename(env, v)), ex.args)
       if (T = partial(Ts...)) != nothing
         if T isa Node
           env[k] = T.value
@@ -120,7 +120,7 @@ function traceblock!(out, env, bl)
           env[k] = push!(out, stmt(rename(env, v.expr), type = T))
         end
       else
-        env[k] = tracecall!(out, ex.args, Ts)
+        env[k] = tracecall!(out, rename(env, ex).args, Ts)
       end
     elseif isexpr(ex)
       error("Can't trace through $(ex.head) expression")
@@ -129,8 +129,7 @@ function traceblock!(out, env, bl)
 end
 
 function trace!(out, ir, args)
-  env = Dict()
-  foreach((a, b) -> env[a] = b, arguments(ir), args)
+  env = Dict{Any,Any}(zip(arguments(ir), args))
   bl = 1
   while true
     traceblock!(out, env, block(ir, bl))

@@ -23,12 +23,19 @@ _union(S, T) = Union{widen(S), widen(T)}
 _issubtype(S, T::Type) = widen(S) <: T
 _issubtype(S, T) = S == T
 
+function instrument(ex)
+  isexpr(ex, :new) ? xcall(Abstract, :__new__, ex.args...) :
+  isexpr(ex, :splatnew) ? xcall(Abstract, :__splatnew__, ex.args...) :
+  ex
+end
+
 function prepare_ir!(ir)
   IRTools.expand!(ir)
   for b in ir.blocks
     b.argtypes .= Union{}
     for i in 1:length(b.stmts)
-      b.stmts[i] = stmt(b.stmts[i], type = Union{})
+      st = b.stmts[i]
+      b.stmts[i] = stmt(st, expr = instrument(st.expr), type = Union{})
     end
   end
   return ir
