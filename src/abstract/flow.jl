@@ -166,7 +166,7 @@ function infer!(inf::Inference)
   end
   for (_, fr) in inf.frames
     inline_bbs!(fr)
-    fr.ir |> IRTools.trimblocks!
+    fr.ir |> IRTools.Inner.trimblocks!
   end
   return inf
 end

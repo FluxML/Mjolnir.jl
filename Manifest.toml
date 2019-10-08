@@ -34,15 +34,15 @@ uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
 
 [[DataAPI]]
-git-tree-sha1 = "8903f0219d3472543fc4b2f5ebaf675a07f817c0"
+git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.0.1"
+version = "1.1.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "0809951a1774dc724da22d26e4289bbaab77809a"
+git-tree-sha1 = "f94423c68f2e47db0d6f626a26d4872266e0ec3d"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.0"
+version = "0.17.2"
 
 [[Dates]]
 deps = ["Printf"]
@@ -58,13 +58,13 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "baaf9e165ba8a2d11fb4fb3511782ee070ee3694"
+git-tree-sha1 = "b419fcf95ef9c8cf4d6610cd323890ad66d64240"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.21.1"
+version = "0.21.3"
 
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
-git-tree-sha1 = "e7c7cf30348117b91166cbb4a1f84ed2cc430d4d"
+git-tree-sha1 = "09e4091acb2c4aac29a673fab16e0f1aa8672b2a"
 repo-rev = "master"
 repo-url = "https://github.com/MikeInnes/IRTools.jl.git"
 uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
@@ -75,7 +75,6 @@ deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[LibGit2]]
-deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[Libdl]]
@@ -99,9 +98,10 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Missings]]
-git-tree-sha1 = "29858ce6c8ae629cf2d733bffa329619a1c843d0"
+deps = ["DataAPI"]
+git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "0.4.2"
+version = "0.4.3"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -119,7 +119,7 @@ uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.9.10"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
+deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Printf]]

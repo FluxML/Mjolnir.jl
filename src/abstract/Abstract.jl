@@ -1,8 +1,8 @@
 module Abstract
 
 using IRTools, MacroTools
-using IRTools: IR, CFG, Variable, block, blocks, arguments, argtypes, isexpr,
-  stmt, branches, isreturn, returnvalue, argument!, return!
+using IRTools.All
+using IRTools: block
 
 abstract(Ts...) = nothing
 partial(Ts...) = abstract(Ts...)

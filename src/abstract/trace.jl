@@ -31,7 +31,7 @@ function copyblock!(ir::IR, b)
 end
 
 function abstract_group(cfg, i)
-  j = IRTools.idoms(cfg', entry = length(cfg))[i]
+  j = IRTools.Inner.idoms(cfg', entry = length(cfg))[i]
   group = Int[]
   group!(b) =
     (b == j || b in group) || (push!(group, b); foreach(group!, cfg[b]))
