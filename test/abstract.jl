@@ -95,3 +95,20 @@ tr = @trace foo(1)
 
 tr = @trace foo(2)
 @test returntype(tr) == Int
+
+struct Foo
+  x
+end
+
+function foo(x)
+  r = Foo(x)
+  return r.x
+end
+
+tr = @trace foo(2)
+@test returntype(tr) == Const(2)
+
+foo(x) = Foo(x)
+
+tr = @trace foo(1)
+@test returntype(tr) == Const(Foo(1))

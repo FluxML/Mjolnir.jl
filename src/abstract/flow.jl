@@ -93,8 +93,8 @@ struct Inference
   queue::WorkQueue{Any}
 end
 
+exprtype(ir, x) = Const(x)
 exprtype(ir, x::Variable) = IRTools.exprtype(ir, x)
-exprtype(ir, x::Union{Number,String}) = Const(x)
 exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 exprtype(ir, x::QuoteNode) = Const(x.value)
 

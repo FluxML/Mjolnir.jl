@@ -124,6 +124,8 @@ function traceblock!(out, env, bl)
       end
     elseif isexpr(ex)
       error("Can't trace through $(ex.head) expression")
+    else
+      env[k] = ex
     end
   end
 end
