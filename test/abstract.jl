@@ -2,6 +2,8 @@ using Poirot.Abstract, IRTools, Test
 using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype
 using IRTools: var, returnvalue
 
+returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
+
 ir = @code_ir identity(1)
 @test return_type(ir, Nothing, Int) == Int
 
@@ -46,8 +48,6 @@ ir = @code_ir fact(1)
 @test return_type(ir, Nothing, Int) == Int
 
 # Tracing
-
-returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
 tr = @trace pow(Int, 3)
 @test length(tr.blocks) == 1
@@ -112,3 +112,17 @@ foo(x) = Foo(x)
 
 tr = @trace foo(1)
 @test returntype(tr) == Const(Foo(1))
+
+function pow(x, n)
+  env = Dict()
+  env[:r] = 1
+  env[:n] = n
+  while env[:n] > 0
+    env[:r] *= x
+    env[:n] -= 1
+  end
+  return env[:r]
+end
+
+tr = @trace pow(2, 3)
+@test returntype(tr) == Const(8)

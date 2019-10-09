@@ -137,7 +137,7 @@ function trace!(out, ir, args)
     traceblock!(out, env, block(ir, bl))
     brs = openbranches(out, env, block(ir, bl))
     if length(brs) == 1
-      isreturn(brs[1]) && return env[returnvalue(brs[1])]
+      isreturn(brs[1]) && return rename(env, returnvalue(brs[1]))
       bl = brs[1].block
       foreach((a, b) -> env[a] = get(env, b, 1), arguments(block(ir, bl)), arguments(brs[1]))
     else

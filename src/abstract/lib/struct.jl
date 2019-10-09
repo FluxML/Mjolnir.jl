@@ -52,3 +52,16 @@ function abstract(::AType{typeof(getfield)}, x::Partial{T}, name) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
 end
+
+# Dictionaries
+
+partial(::AType{Type{Dict}}) = Partial{Dict{Any,Any}}(Dict())
+
+function partial(::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+  x.value[name.value] = s
+  x
+end
+
+function partial(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+  x.value[name.value]
+end
