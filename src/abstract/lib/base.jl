@@ -24,3 +24,6 @@ for op in :[>, >=, <, <=, ==, !=].args
   @eval abstract(::AType{typeof($op)}, a::Const{<:Number}, b::Const{<:Number}) =
           Const($op(a.value, b.value))
 end
+
+abstract(::AType{typeof(===)}, a, b) = Bool
+abstract(::AType{typeof(===)}, a::Const, b::Const) = Const(a.value == b.value)
