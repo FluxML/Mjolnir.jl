@@ -65,3 +65,12 @@ end
 function partial(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
   x.value[name.value]
 end
+
+function abstract(::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+  x.value[name.value] = _union(x.value[name.value], s)
+  x
+end
+
+function abstract(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+  x.value[name.value]
+end

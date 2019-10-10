@@ -126,3 +126,6 @@ end
 
 tr = @trace pow(2, 3)
 @test returntype(tr) == Const(8)
+
+tr = @trace pow(Int, Int)
+@test returntype(tr) == Int
