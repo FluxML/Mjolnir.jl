@@ -13,5 +13,12 @@ function Base.push!(q::WorkQueue, x)
   return q
 end
 
+function Base.push!(q::WorkQueue, xs...)
+  for x in xs
+    push!(q, x)
+  end
+  return q
+end
+
 Base.pop!(q::WorkQueue) = pop!(q.items)
 Base.isempty(q::WorkQueue) = isempty(q.items)

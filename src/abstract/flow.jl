@@ -19,6 +19,7 @@ widen(::AType{T}) where T = T
 
 _union(::Type{Union{}}, T) = T
 _union(S::Const, T::Const) = S == T ? S : Union{widen(S),widen(T)}
+_union(S::Partial, T::Partial) = S == T ? S : Union{widen(S),widen(T)}
 _union(S, T) = Union{widen(S), widen(T)}
 _issubtype(S, T::Type) = widen(S) <: T
 _issubtype(S, T) = S == T
@@ -64,6 +65,9 @@ getblock(fr::Frame, b, follow) =
   follow == 0 ? (block(fr.ir, b), fr.stmts[b]) :
     (block(fr.inlined[b][follow], 1), keys(fr.inlined[b][follow]))
 
+# TODO clear up inlined edges
+uninline!(fr::Frame, b, follow) = deleteat!(fr.inlined[b], follow+1:length(fr.inlined[b]))
+
 Frame(ir::IR) = Frame(ir, [IR[] for _ = 1:length(blocks(ir))], [], keys.(blocks(ir)), Union{})
 
 function frame(ir::IR, args...)
@@ -97,6 +101,15 @@ end
 struct MutCtx
   inf::Inference
   ip
+end
+
+function edge!(cx::MutCtx, x::Partial) # TODO: clear edges?
+  push!(get!(cx.inf.edges, x, Set()), cx.ip)
+  return
+end
+
+function visit!(cx::MutCtx, x::Partial) # TODO: can do this by key
+  push!(cx.inf.queue, get!(cx.inf.edges, x, Set())...)
 end
 
 exprtype(ir, x) = Const(x)
@@ -142,6 +155,7 @@ end
 function step!(inf::Inference)
   frame, b, f, ip = pop!(inf.queue)
   block, stmts = getblock(frame, b, f)
+  uninline!(frame, b, f)
   if ip <= length(stmts)
     var = stmts[ip]
     st = block[var]
@@ -164,7 +178,6 @@ function step!(inf::Inference)
       else
         args = exprtype.((block.ir,), arguments(br))
         if blockargs!(IRTools.block(frame.ir, br.block), args)
-          empty!(frame.inlined[br.block])
           push!(inf.queue, (frame, br.block, 0, 1))
         end
       end

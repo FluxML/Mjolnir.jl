@@ -42,15 +42,18 @@ end
 partial(::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
   Const(getfield(x.value, name.value))
 
-# TODO: in the abstract interpreter, mutable data should have backedges
-
-function abstract(::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+function abstract(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
-  x.value[i] = _union(x.value[i], s)
+  S = x.value[i]
+  if !_issubtype(s, S)
+    x.value[i] = _union(S, s)
+    visit!(cx, x)
+  end
   x
 end
 
-function abstract(::AType{typeof(getfield)}, x::Partial{T}, name) where T
+function abstract(cx::MutCtx, ::AType{typeof(getfield)}, x::Partial{T}, name) where T
+  edge!(cx, x)
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
 end
@@ -68,11 +71,16 @@ function partial(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<
   x.value[name.value]
 end
 
-function abstract(::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
-  x.value[name.value] = _union(x.value[name.value], s)
-  x
+function abstract(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+  T = get(x.value, name.value, Union{})
+  if !_issubtype(s, T)
+    visit!(cx, x)
+    x.value[name.value] = _union(T, s)
+  end
+  return x
 end
 
-function abstract(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
-  x.value[name.value]
+function abstract(cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+  edge!(cx, x)
+  get(x.value, name.value, Union{})
 end
