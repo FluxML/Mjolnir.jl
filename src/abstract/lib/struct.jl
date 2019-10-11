@@ -1,3 +1,5 @@
+abstract(::MutCtx, Ts...) = abstract(Ts...)
+
 @generated function __new__(T, args...)
   quote
     Base.@_inline_meta

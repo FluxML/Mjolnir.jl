@@ -1,4 +1,4 @@
-struct Partial{T}
+mutable struct Partial{T}
   value
 end
 
@@ -91,6 +91,12 @@ end
 struct Inference
   frames::Dict{Vector{AType},Frame}
   queue::WorkQueue{Any}
+  edges::IdDict{Partial,Any}
+end
+
+struct MutCtx
+  inf::Inference
+  ip
 end
 
 exprtype(ir, x) = Const(x)
@@ -100,7 +106,7 @@ exprtype(ir, x::QuoteNode) = Const(x.value)
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
-  T = abstract(Ts...)
+  T = abstract(MutCtx(inf, loc), Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
@@ -181,7 +187,7 @@ end
 function Inference(fr::Frame)
   q = WorkQueue{Any}()
   push!(q, (fr, 1, 0, 1))
-  Inference(Dict(argtypes(fr.ir)=>fr), q)
+  Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict())
 end
 
 function infer!(ir::IR, args...)
