@@ -1,4 +1,4 @@
-using .Abstract: AType, @trace, abstract
+using .Abstract: AType, @trace, abstract, trace
 
 struct ConditionError end
 
@@ -9,7 +9,19 @@ end
 
 Abstract.abstract(::AType{typeof(observe)}, ::AType{Bool}) = Nothing
 
-function infer(f)
-  alg = Rejection()
-  infer(f, alg)
+struct Multi
+  algs::Vector{Any}
+  Multi(algs...) = new(Any[algs...])
 end
+
+function infer(f, m::Multi)
+  tr = trace(typeof(f))
+  for alg in m.algs
+    r = infer(f, alg, tr)
+    r == nothing || return r
+  end
+end
+
+default() = Multi(Trivial(), Rejection())
+
+infer(f) = infer(f, default())

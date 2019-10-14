@@ -15,7 +15,7 @@ function exec(f)
   end
 end
 
-function infer(f, alg::Rejection)
+function infer(f, alg::Rejection, tr = nothing)
   @info "Using rejection sampling, N=$(alg.samples)"
   samples = Core.Compiler.return_type(f, Tuple{})[]
   @showprogress for i = 1:alg.samples

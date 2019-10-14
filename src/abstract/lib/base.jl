@@ -27,3 +27,7 @@ end
 
 abstract(::AType{typeof(===)}, a, b) = Bool
 abstract(::AType{typeof(===)}, a::Const, b::Const) = Const(a.value == b.value)
+
+abstract(::AType{typeof(float)}, x::Const{<:Number}) = Const(float(x.value))
+
+abstract(::AType{typeof(!)}, x::Const{Bool}) = Const(!(x.value))

@@ -1,8 +1,6 @@
 using Poirot.Abstract, IRTools, Test
-using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype
+using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype, returntype
 using IRTools: var, returnvalue
-
-returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
 ir = @code_ir identity(1)
 @test return_type(ir, Nothing, Int) == Int

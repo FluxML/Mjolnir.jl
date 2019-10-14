@@ -1,3 +1,7 @@
+struct Singleton{T}
+  value::T
+end
+
 # TODO make this a distribution, approximate logpdf etc
 
 struct Empirical{T}

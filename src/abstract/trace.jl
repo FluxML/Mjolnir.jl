@@ -1,9 +1,11 @@
 rename(env, ex) = IRTools.prewalk(x -> x isa Variable ? env[x] : x, ex)
 
+returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
+
 function inline_consts!(ir::IR)
   env = Dict()
   for (v, st) in ir
-    if st.type isa Const
+    if st.type isa Union{Const,Node}
       delete!(ir, v)
       env[v] = st.type.value
     else
@@ -104,9 +106,9 @@ function openbranches(out, env, bl)
   return brs
 end
 
-nodetype(x, T::AType) = T
-nodetype(x, T::Type) = Node{T}(x)
-nodetype(ir::IR, x) = nodetype(x, exprtype(ir, x))
+_nodetype(x, T::AType) = T
+_nodetype(x, T::Type) = Node{T}(x)
+nodetype(ir::IR, x) = _nodetype(x, exprtype(ir, x))
 
 function traceblock!(out, env, bl)
   for (k, v) in bl
