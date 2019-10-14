@@ -2,6 +2,8 @@ struct Singleton{T}
   value::T
 end
 
+Base.show(io::IO, x::Singleton) = print(io, "Singleton(", x.value, ")")
+
 # TODO make this a distribution, approximate logpdf etc
 
 struct Empirical{T}
