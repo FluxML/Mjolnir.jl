@@ -1,4 +1,6 @@
-rename(env, ex) = IRTools.prewalk(x -> x isa Variable ? env[x] : x, ex)
+rename(env, ex) = IRTools.prewalk(
+  x -> x isa GlobalRef ? getfield(x.mod, x.name) :
+  x isa Variable ? env[x] : x, ex)
 
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
@@ -124,6 +126,7 @@ function traceblock!(out, env, bl)
       else
         env[k] = tracecall!(out, rename(env, ex).args, Ts)
       end
+    elseif isexpr(ex, :meta)
     elseif isexpr(ex)
       error("Can't trace through $(ex.head) expression")
     else
