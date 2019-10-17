@@ -78,8 +78,8 @@ function inline!(out, ir, args)
   for bl in blocks(ir)[2:end]
     bmap[bl.id] = copyblock!(out, bl).id
   end
-  for b in before.id:blocks(out)[end].id, (i, br) in enumerate(branches(block(ir, b)))
-    branches(block(ir, b))[i] = IRTools.Branch(br, block = bmap[br.block])
+  for b in before.id:blocks(out)[end].id, (i, br) in enumerate(branches(block(out, b)))
+    branches(block(out, b))[i] = IRTools.Branch(br, block = bmap[br.block])
   end
 end
 
