@@ -45,7 +45,7 @@ end
 
 function extract_group(bl)
   out = IR()
-  args = union(arguments.(branches(block(bl.ir, bl.id)))...)
+  args = filter(x -> x isa Variable, union(arguments.(branches(block(bl.ir, bl.id)))...))
   args = union(args, filter(x -> x != nothing, map(x -> x.condition, branches(block(bl.ir, bl.id)))))
   innerargs = Dict(a => argument!(out, Union{}) for a in args)
   for br in branches(block(bl.ir, bl.id))
@@ -154,7 +154,7 @@ end
 function tracecall!(tr, args, Ts)
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
-  ir = prepare_ir!(ir)
+  ir = ir |> merge_returns! |> prepare_ir!
   trace!(tr, ir, args)
 end
 

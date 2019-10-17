@@ -52,6 +52,9 @@ ir = @code_ir fact(1)
 
 # Tracing
 
+tr = @trace f()
+@test returntype(tr) == String
+
 tr = @trace pow(Int, 3)
 @test length(tr.blocks) == 1
 @test returntype(tr) == Int
