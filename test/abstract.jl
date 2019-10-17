@@ -19,6 +19,11 @@ ir = @code_ir addg(2)
 @test return_type(ir, Nothing, Const(2)) == Const(4)
 @test return_type(ir, Nothing, Float64) == Float64
 
+f() = rand() < 0.5 ? "foo" : "bar"
+
+ir = @code_ir f()
+@test return_type(ir, Nothing) == String
+
 function pow(x, n)
   r = 1
   while n > 0

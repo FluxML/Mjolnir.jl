@@ -144,7 +144,7 @@ function trace!(out, ir, args)
     if length(brs) == 1
       isreturn(brs[1]) && return rename(env, returnvalue(brs[1]))
       bl = brs[1].block
-      foreach((a, b) -> env[a] = get(env, b, 1), arguments(block(ir, bl)), arguments(brs[1]))
+      foreach((a, b) -> env[a] = rename(env, b), arguments(block(ir, bl)), arguments(brs[1]))
     else
       bl = abstract!(out, block(ir, bl), env)
     end

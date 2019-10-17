@@ -31,7 +31,7 @@ function instrument(ex)
 end
 
 function prepare_ir!(ir)
-  IRTools.expand!(ir)
+  ir |> IRTools.expand! |> IRTools.explicitbranch!
   for b in ir.blocks
     b.argtypes .= Union{}
     for i in 1:length(b.stmts)
@@ -43,6 +43,7 @@ function prepare_ir!(ir)
 end
 
 function blockargs!(b, args)
+  isempty(args) && return true # TODO be more fine grained
   changed = false
   for i = 1:length(argtypes(b))
     _issubtype(args[i], argtypes(b)[i]) && continue
