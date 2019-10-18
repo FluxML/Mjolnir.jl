@@ -11,7 +11,7 @@ abstract(::AType{typeof(typeof)}, x::AType{T}) where T =
 abstract(::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{Symbol}) =
   Const(fieldtype(T.value, f.value))
 
-for op in :[+, -, *, /].args
+for op in :[+, -, *, /, &, |].args
   @eval abstract(::AType{typeof($op)}, ::AType{S}, ::AType{T}) where {S<:Number,T<:Number} =
           promote_type(S, T)
   @eval abstract(::AType{typeof($op)}, a::Const{<:Number}, b::Const{<:Number}) =
@@ -37,3 +37,8 @@ abstract(::AType{typeof(convert)}, ::Const{Type{T}}, x::Const{<:Number}) where T
   Const(convert(T, x.value))
 
 abstract(::AType{typeof(!)}, x::Const{Bool}) = Const(!(x.value))
+
+abstract(::AType{typeof(repr)}, x) = String
+abstract(::AType{typeof(repr)}, x::Const) = Const(repr(x.value))
+abstract(::AType{typeof(println)}, xs...) = Nothing
+abstract(::AType{typeof(print)}, xs...) = Nothing

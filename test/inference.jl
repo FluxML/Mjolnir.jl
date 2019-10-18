@@ -9,6 +9,18 @@ Random.seed!(0)
 @test infer(() -> rand(Normal(0, 1))) == Normal(0, 1)
 @test infer(() -> rand(Bernoulli(0.5))) == Bernoulli(0.5)
 
+coin() = rand(Bernoulli(0.5))
+
+@test infer(() -> coin() & coin()) == Bernoulli(0.25)
+@test infer(() -> coin() | coin()) == Bernoulli(0.75)
+
+@test infer() do
+  a = coin()
+  b = coin()
+  observe(a | b)
+  a & b
+end == Bernoulli(1/3)
+
 @test infer() do
   x = rand(Normal(0, 1))
   observe(x > 0)
