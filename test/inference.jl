@@ -16,8 +16,18 @@ Random.seed!(0)
 end isa Poirot.Empirical
 
 d = infer() do
-  i = rand(Uniform(1,10))
-  i^2 > 50
+  x = rand(Uniform(0,10))
+  x^2 > 50
 end
 
-@test 0.3 < mean(d) < 0.35
+@test d isa Bernoulli
+@test mean(d) ≈ (10-sqrt(50))/10
+
+d = infer() do
+  x = rand(Uniform(0,10))
+  observe(x > 5)
+  x^2 > 50
+end
+
+@test d isa Bernoulli
+@test mean(d) ≈ (10-sqrt(50))/5

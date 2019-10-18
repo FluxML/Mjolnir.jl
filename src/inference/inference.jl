@@ -22,6 +22,6 @@ function infer(f, m::Multi)
   end
 end
 
-default() = Multi(Trivial(), Rejection())
+default() = Multi(Trivial(), Quad(), Rejection())
 
 infer(f) = infer(f, default())

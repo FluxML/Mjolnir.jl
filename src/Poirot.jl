@@ -1,6 +1,6 @@
 module Poirot
 
-using Reexport, Printf, IRTools.All
+using Reexport, Printf, IRTools.All, QuadGK
 @reexport using Distributions
 @reexport using Statistics
 using MacroTools: @forward
@@ -16,6 +16,7 @@ include("compiler/logprob.jl")
 include("inference/distributions.jl")
 include("inference/inference.jl")
 include("inference/trivial.jl")
+include("inference/quad.jl")
 include("inference/rejection.jl")
 
 end # module
