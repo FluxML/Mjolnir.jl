@@ -18,7 +18,10 @@ function partial(::Const{typeof(__new__)}, ::AType{Type{T}}, xs...) where T
   Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
 end
 
-function partial(::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) where T
+partial(::Const{typeof(__new__)}, t::AType{Type{T}}, xs::Const...) where T =
+  abstract(Const(__new__), t, xs...)
+
+function abstract(::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) where T
   if T.mutable
     Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
   else

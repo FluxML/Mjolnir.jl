@@ -167,7 +167,8 @@ function step!(inf::Inference)
         push!(inf.queue, (frame, b, f, ip+1))
       end
     end
-  elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1]) && !(brs[1].block == length(frame.ir.blocks)))
+  elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
+          && !(brs[1].block == length(frame.ir.blocks)))
     inferbranch!(inf, frame, b, f, brs[1])
   else
     for br in brs
