@@ -1,4 +1,4 @@
-using .Abstract: trace, returntype
+using .Abstract: returntype
 using IRTools: Variable, returnvalue, blocks, isexpr
 using IRTools.Inner: iscall
 
