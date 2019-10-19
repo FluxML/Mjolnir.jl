@@ -1,4 +1,4 @@
-using .Abstract: AType, @trace, abstract, trace
+using .Abstract: AType, @trace, abstract
 
 struct ConditionError end
 

@@ -11,6 +11,7 @@ export infer, observe
 include("abstract/Abstract.jl")
 using .Abstract
 
+include("compiler/simplify.jl")
 include("compiler/logprob.jl")
 
 include("inference/distributions.jl")
