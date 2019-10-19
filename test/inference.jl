@@ -8,7 +8,7 @@ Random.seed!(0)
 
 @test infer(() -> rand()) == Uniform(0, 1)
 @test infer(() -> randn()) == Normal(0, 1)
-@test infer(() -> rand(Bool)) == Bernoulli(0.5)
+@test infer(() -> rand(Bool)) == Bernoulli(1//2)
 
 coin() = rand(Bool)
 
