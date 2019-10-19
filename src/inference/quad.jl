@@ -6,7 +6,7 @@ select(::Type{Bool}, r, p) = r ? [exp(p), 0] : [0, exp(p)]
 
 normalise(p) = p ./ sum(p)
 
-distribution(::Type{Bool}, ps) = Bernoulli(normalise(ps)[1])
+distribution(::Type{Bool}, ps) = collapse(Bernoulli(normalise(ps)[1]))
 
 quad(f) = f()
 

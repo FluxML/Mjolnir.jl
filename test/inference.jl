@@ -22,6 +22,14 @@ coin() = rand(Bool)
   a & b
 end == Bernoulli(1/3)
 
+infer() do
+  a = coin()
+  b = coin()
+  observe(a | b)
+  observe(!b)
+  a
+end == Singleton(true)
+
 @test infer() do
   x = randn()
   observe(x > 0)

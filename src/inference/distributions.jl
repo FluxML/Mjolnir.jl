@@ -4,6 +4,11 @@ end
 
 Base.show(io::IO, x::Singleton) = print(io, "Singleton(", x.value, ")")
 
+collapse(x::Bernoulli) =
+  mean(x) == 1.0 ? Singleton(true) :
+  mean(x) == 0.0 ? Singleton(false) :
+  x
+
 # TODO make this a distribution, approximate logpdf etc
 
 struct Empirical{T}
