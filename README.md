@@ -4,6 +4,10 @@
 
 [![Build Status](https://travis-ci.org/MikeInnes/Poirot.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Poirot.jl)
 
+```julia
+] add https://github.com/MikeInnes/Poirot.jl
+```
+
 Poirot contains a series of experiments in probabilistic programming, both at the interface level and in terms of the abstract tracing used to implement it. Note that as an early prototype, anything not explicitly stated to work probably doesn't.
 
 As a modelling language, Poirot has two intertwined main goals:
