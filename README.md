@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/MikeInnes/Poirot.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Poirot.jl)
 
 ```julia
+] add https://github.com/MikeInnes/XLATools.jl
 ] add https://github.com/MikeInnes/Poirot.jl
 ```
 
