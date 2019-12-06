@@ -113,10 +113,8 @@ function visit!(cx::MutCtx, x::Partial) # TODO: can do this by key
   push!(cx.inf.queue, get!(cx.inf.edges, x, Set())...)
 end
 
-exprtype(ir, x) = Const(x)
-exprtype(ir, x::Variable) = IRTools.exprtype(ir, x)
+exprtype(ir, x) = IRTools.exprtype(ir, x, typeof = Const)
 exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
-exprtype(ir, x::QuoteNode) = Const(x.value)
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
