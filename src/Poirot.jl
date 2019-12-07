@@ -6,7 +6,7 @@ using Reexport, Printf, IRTools.All, QuadGK
 using MacroTools: @forward
 
 export Rejection
-export infer, observe, @code_xla
+export infer, observe, @code_xla, xla
 
 include("abstract/Abstract.jl")
 using .Abstract

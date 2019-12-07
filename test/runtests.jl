@@ -14,4 +14,8 @@ end
   include("inference.jl")
 end
 
+@testset "LAX" begin
+  include("lax.jl")
+end
+
 end

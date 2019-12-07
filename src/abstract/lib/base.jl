@@ -1,6 +1,9 @@
 abstract(::AType{typeof(getfield)}, m::Const{Module}, f::Const{Symbol}) =
   Const(getfield(m.value, f.value))
 
+abstract(::AType{typeof(getfield)}, m::AType{T}, f::Const{Symbol}) where T =
+  fieldtype(T, f.value)
+
 abstract(::AType{typeof(Core.apply_type)}, Ts::Const...) =
   Const(Core.apply_type(map(T -> T.value, Ts)...))
 
