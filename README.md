@@ -17,7 +17,7 @@ As a modelling language, Poirot has two intertwined main goals:
 1. Poirot's modelling language should abstract over a range of inference methods, from analytical methods, to factor graph representations, to monte carlo and ABC. Compiler analysis allows us to (automatically) choose an appropriate representation compatible with the best possible inference algorithm. There is no "static"/"dynamic" modelling distinction.
 2. If you have no idea what any of (1) means, you should still be able to use Poirot productively, learning about more advanced concepts as you go.
 
-## Probablistic Modelling
+## Probabilistic Modelling
 
 It easy to write randomised programs in Julia. They can be as short as one line!
 
