@@ -7,3 +7,6 @@ function double(x)
 end
 
 @test double(21) == 42
+
+add(a, b) = a+b
+@test @code_xla(add(2, 3)) isa Poirot.Abstract.IR
