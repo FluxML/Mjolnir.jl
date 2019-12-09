@@ -3,8 +3,16 @@ exprtype(ir, x) = IRTools.exprtype(ir, x, typeof = Const)
 layout(x::XScalar) = typeof(x)
 layout(x) = map(f -> layout(getfield(x, f)), fieldnames(typeof(x)))
 
-xlaop(args, ::AType{typeof(+)}, _, _) =
-  Expr(:call, XLATools.Add(), args[2:end]...)
+# TODO: arithmetic ops should implement promotion
+
+for (op, xop) in [(+, :Add),
+                  (*, :Mul),
+                  (-, :Sub),
+                  (^, :Pow),
+                  (>, :Gt)]
+  @eval xlaop(args, ::AType{typeof($op)}, _, _) =
+          xcall(XLATools.$xop(), args[2:end]...)
+end
 
 fieldnum(T, f) = findfirst(==(f), fieldnames(T))
 

@@ -14,7 +14,7 @@ abstract(::AType{typeof(typeof)}, x::AType{T}) where T =
 abstract(::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{Symbol}) =
   Const(fieldtype(T.value, f.value))
 
-for op in :[+, -, *, /, &, |].args
+for op in :[+, -, *, /, &, |, ^].args
   @eval abstract(::AType{typeof($op)}, ::AType{S}, ::AType{T}) where {S<:Number,T<:Number} =
           promote_type(S, T)
   @eval abstract(::AType{typeof($op)}, a::Const{<:Number}, b::Const{<:Number}) =
