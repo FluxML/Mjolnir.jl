@@ -10,3 +10,5 @@ end
 
 add(a, b) = a+b
 @test @code_xla(add(2, 3)) isa Poirot.Abstract.IR
+
+@test xla(() -> 2+2) == 4
