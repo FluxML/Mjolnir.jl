@@ -11,6 +11,7 @@ include("utils.jl")
 include("flow.jl")
 include("trace.jl")
 include("lib/base.jl")
+include("lib/array.jl")
 include("lib/struct.jl")
 include("lib/random.jl")
 

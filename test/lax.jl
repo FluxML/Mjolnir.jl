@@ -23,3 +23,7 @@ relu(x) = xla(() -> x > 0 ? x : 0)
 @test relu(5) == 5
 @test relu(-5) == 0
 @test_broken relu(5.0) == 5.0
+
+let x = rand(3), y = rand(3)
+  @test collect(xla(() -> x+y)) == x+y
+end

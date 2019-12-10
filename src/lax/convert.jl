@@ -2,6 +2,7 @@ exprtype(ir, x) = IRTools.exprtype(ir, x, typeof = Const)
 
 layout(x::XScalar) = typeof(x)
 layout(x) = map(f -> layout(getfield(x, f)), fieldnames(typeof(x)))
+layout(x::Array) = Shape(eltype(x), size(x))
 
 # TODO: arithmetic ops should implement promotion
 

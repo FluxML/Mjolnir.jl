@@ -1,7 +1,7 @@
 module LAX
 
 using XLATools, MacroTools, IRTools, IRTools.All
-using XLATools: XScalar
+using XLATools: XArray, XScalar, Shape
 using ..Abstract: AType, Const, trace
 
 export @code_xla, xla
