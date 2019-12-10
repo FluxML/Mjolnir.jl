@@ -5,11 +5,7 @@ layout(x) = map(f -> layout(getfield(x, f)), fieldnames(typeof(x)))
 
 # TODO: arithmetic ops should implement promotion
 
-for (op, xop) in [(+, :Add),
-                  (*, :Mul),
-                  (-, :Sub),
-                  (^, :Pow),
-                  (>, :Gt)]
+for (op, xop) in [(+, :Add), (*, :Mul), (-, :Sub), (^, :Pow), (>, :Gt)]
   @eval xlaop(args, ::AType{typeof($op)}, _, _) =
           xcall(XLATools.$xop(), args[2:end]...)
 end
