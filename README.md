@@ -102,7 +102,7 @@ julia> infer() do
 Singleton(true)
 ```
 
-We can use this as a kind of statistical pocket calculator. For example: you take a test which is 99% accurate<sup>\*</sup>, for a disease that affects one in one hundred thousand people. How likely is it that you have the disease?
+We can use this as a kind of statistical pocket calculator. For example: you took a test which is 99% accurate<sup>\*</sup>, for a disease that affects one in one hundred thousand people. Given that the test returns positive for the disease, how likely is it that you have the disease?
 
 (\*both sensitivity and specificity, for simplicity)
 
