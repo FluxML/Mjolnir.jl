@@ -164,11 +164,12 @@ an `xla` or `infer` block, we take a deepcopy of the whole environment; so you
 can only communicate with that block via normal inputs and outputs and explicit
 I/O (channels).
 
-In control-flow-free code this will mean that no data structure operations will
-turn up in the trace. It turns out that this is _also_ true in code with control
-flow, since we can just infer data structure slots as if they were local
-variables (with some additional challenges). Just like in Jax this means we can
-elide those data structures and make things like XLA compilation possible.
+In control-flow-free code this assumption will mean that no data structure
+operations will turn up in the trace. It turns out that this is _also_ true in
+code with control flow, since we can just infer data structure slots as if they
+were local variables (with some additional challenges). Just like in Jax this
+means we can elide those data structures and make things like XLA compilation
+possible.
 
 ```julia
 julia> function f(x)
@@ -190,3 +191,10 @@ julia> @trace f(Int)
 3: (%4 :: Int64)
   return %4
 ```
+
+[It may be possible to make this even nicer by seeing the block as a
+_transaction_, i.e.  mutations are visible but are committed atomically once the
+block is done running. Modern views on state and change developed primarily by
+the functional and the database communities have a lot to offer the ML
+engineering world. This is effectively how Julia makes changes to runtime state
+(method redefinition) work, too.]
