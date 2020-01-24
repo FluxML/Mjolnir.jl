@@ -10,6 +10,8 @@ limited set of operations.
 Some limited XLA support is exposed in Poirot via the `xla` function.
 
 ```julia
+julia> using Poirot.LAX
+
 julia> x = rand(3); y = rand(3);
 
 julia> xla() do
@@ -37,8 +39,8 @@ julia> relu(-5)
 0
 ```
 
-(This [roughly] follows Julia's compilation model, so we're not re-compiling
-every time you call `relu` here.)
+[This (roughly) follows Julia's compilation model, so we're not re-compiling
+every time you call `relu` here.]
 
 ## Poirot's Tracer
 
@@ -104,6 +106,10 @@ branch, we just include it. (In this representation, control flow like `if` and
 `while` is represented by branches like `br n (x)`. This is like a goto that
 jumps to label `n` with `x` as an argument.)
 
+[`pow` doesn't yet work with XLA, since lowering loops into XLA IR is it's own
+fun little game. See [XLATools](https://github.com/MikeInnes/XLATools.jl) for
+more on that.]
+
 ```julia
 julia> @trace relu(Int)
 1: (%1 :: const(relu), %2 :: Int64)
@@ -115,10 +121,6 @@ julia> @trace relu(Int)
 3: (%4 :: Int64)
   return %4
 ```
-
-[`pow` doesn't yet work with XLA, since lowering loops into XLA IR is it's own
-fun little game. See [XLATools](https://github.com/MikeInnes/XLATools.jl) for
-more on that.]
 
 To support this kind of thing there are currently two broad approaches:
 
