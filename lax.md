@@ -174,17 +174,21 @@ means we can elide those data structures and make things like XLA compilation
 possible.
 
 ```julia
-julia> function f(x)
-         env = Dict()
-         env[:x] = x
+julia> function updatezero!(env)
          if env[:x] < 0
            env[:x] = 0
          end
+       end
+
+julia> function relu(x)
+         env = Dict()
+         env[:x] = x
+         updatezero!(env)
          return env[:x]
        end
 
-julia> @trace f(Int)
-1: (%1 :: const(f), %2 :: Int64)
+julia> @trace relu(Int)
+1: (%1 :: const(relu), %2 :: Int64)
   %3 = (<)(%2, 0) :: Bool
   br 3 (%2) unless %3
   br 2
@@ -192,6 +196,12 @@ julia> @trace f(Int)
   br 3 (0)
 3: (%4 :: Int64)
   return %4
+
+julia> xla(() -> relu(5))
+5
+
+julia> xla(() -> relu(-5))
+0
 ```
 
 [It may be possible to make this even nicer by seeing the block as a
