@@ -1,4 +1,4 @@
-using Poirot.LAX, Test
+using Poirot, Poirot.LAX, Test
 
 double(x) = xla(() -> x+x)
 
