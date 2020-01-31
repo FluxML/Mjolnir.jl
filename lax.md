@@ -111,14 +111,14 @@ fun little game. See [XLATools](https://github.com/MikeInnes/XLATools.jl) for
 more on that.]
 
 ```julia
+julia> relu(x) = x > 0 ? x : 0
+
 julia> @trace relu(Int)
 1: (%1 :: const(relu), %2 :: Int64)
   %3 = (>)(%2, 0) :: Bool
-  br 2 unless %3
-  br 3 (%2)
-2:
-  br 3 (0)
-3: (%4 :: Int64)
+  br 2 (0) unless %3
+  br 2 (%2)
+2: (%4 :: Int64)
   return %4
 ```
 
@@ -189,13 +189,11 @@ julia> function relu(x)
 
 julia> @trace relu(Int)
 1: (%1 :: const(relu), %2 :: Int64)
-  %3 = (<)(%2, 0) :: Bool
-  br 3 (%2) unless %3
-  br 2
-2:
-  br 3 (0)
-3: (%4 :: Int64)
-  return %4
+ %3 = (<)(%2, 0) :: Bool
+ br 2 (%2) unless %3
+ br 2 (0)
+2: (%4 :: Int64)
+ return %4
 
 julia> xla(() -> relu(5))
 5

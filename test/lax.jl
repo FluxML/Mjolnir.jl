@@ -27,3 +27,19 @@ relu(x) = xla(() -> x > 0 ? x : 0)
 let x = rand(3), y = rand(3)
   @test collect(xla(() -> x+y)) == x+y
 end
+
+function updatezero!(env)
+  if env[:x] < 0
+    env[:x] = 0
+  end
+end
+
+function relu(x)
+  env = Dict()
+  env[:x] = x
+  updatezero!(env)
+  return env[:x]
+end
+
+@test xla(() -> relu(5)) == 5
+@test xla(() -> relu(-5)) == 0
