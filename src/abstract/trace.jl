@@ -4,21 +4,6 @@ rename(env, ex) = IRTools.prewalk(
 
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
-function inline_consts!(ir::IR)
-  env = Dict()
-  for (v, st) in ir
-    if st.type isa Union{Const,Node}
-      delete!(ir, v)
-      env[v] = st.type.value
-    else
-      env[v] = v
-    end
-  end
-  return IRTools.prewalk!(x -> get(env, x, x), ir)
-end
-
-cleanup!(ir) = ir |> inline_consts! |> IRTools.prune! |> IRTools.renumber
-
 function copyblock!(ir::IR, b)
   c = IRTools.block!(ir)
   env = Dict()

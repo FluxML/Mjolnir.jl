@@ -48,9 +48,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "71a3f1ae1fca9ed876edfbc2079d7b7c27e2e3d5"
+git-tree-sha1 = "6b19601c0e98de3a8964ed33ad73e130c7165b1d"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.22.3"
+version = "0.22.4"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
@@ -60,7 +60,9 @@ version = "0.8.4"
 
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
-git-tree-sha1 = "1a4355e4b5b50be2311ebb644f34f3306dbd0410"
+git-tree-sha1 = "2f12f744f8d1d56afc631452ce44a050fc931a0e"
+repo-rev = "master"
+repo-url = "https://github.com/MikeInnes/IRTools.jl.git"
 uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
 version = "0.3.1"
 
@@ -109,9 +111,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[OpenBLAS_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "3a6e5767e8ae022871c19162cc3ecd80748bd3dc"
+git-tree-sha1 = "e2551d7c25d52f35b76d86a50917a3ba8988f519"
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.7+4"
+version = "0.3.7+5"
 
 [[OpenSpecFun_jll]]
 deps = ["Libdl", "Pkg"]
