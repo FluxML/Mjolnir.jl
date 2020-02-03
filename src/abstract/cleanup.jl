@@ -55,4 +55,4 @@ function trimblocks!(ir)
 end
 
 cleanup!(ir) =
-  ir |> inline_consts! |> partials! |> ssa! |> prune! |> trimblocks! |> renumber
+  ir |> inline_consts! |> partials! |> ssa! |> prune! |> renumber
