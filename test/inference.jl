@@ -52,3 +52,15 @@ end
 
 @test d isa Bernoulli
 @test mean(d) ≈ (10-sqrt(50))/5
+
+d = infer() do
+  identical = rand(Bernoulli(1/3))
+  boy1 = rand(Bernoulli(1/2))
+  # TODO first version gives a different answer
+  # boy2 = identical ? boy1 : rand(Bernoulli(1/2))
+  boy2 = rand(Bernoulli(identical ? boy1*1.0 : 1/2))
+  observe(boy1 & boy2)
+  identical
+end
+
+@test mean(d) == 0.5
