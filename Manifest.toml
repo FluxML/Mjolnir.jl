@@ -253,7 +253,7 @@ version = "1.2.0"
 
 [[XLATools]]
 deps = ["Conda", "IRTools", "PyCall"]
-git-tree-sha1 = "b1978983a9410c1fdf585b8374a7bf2baee7cb04"
+git-tree-sha1 = "119985c9a2f61b0f2c22692bb336642118f8747f"
 repo-rev = "master"
 repo-url = "https://github.com/MikeInnes/XLATools.jl"
 uuid = "e639e2dd-7a4d-472e-a96e-206d6a26373c"
