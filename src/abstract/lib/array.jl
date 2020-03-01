@@ -12,6 +12,9 @@ abstract(::AType{typeof(length)}, xs::PartialArray) = Const(length(xs.value))
 partial(::AType{typeof(getindex)}, xs::PartialArray, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
+abstract(::AType{typeof(getindex)}, xs::Const{<:Array}, i::Const...) =
+  Const(xs.value[map(i -> i.value, i)...])
+
 abstract(::AType{Colon}, xs::Const...) =
   Const(Colon()(map(x -> x.value, xs)...))
 
