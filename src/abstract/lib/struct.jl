@@ -31,7 +31,12 @@ end
 
 partial(::AType{typeof(__splatnew__)}, ::AType{<:Type}, xs...) = error(":new not implemented")
 
-abstract(::Const{typeof(tuple)}, xs...) = Tuple{widen.(xs)...}
+abstract(::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
+
+abstract(::Const{typeof(tuple)}, xs::Const...) = Const((map(x -> x.value, xs)...,))
+
+abstract(::Const{typeof(tuple)}, xs...) =
+  Partial{Tuple{widen.(xs)...}}((xs...,))
 
 function partial(::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))

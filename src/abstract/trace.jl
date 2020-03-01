@@ -102,6 +102,7 @@ function traceblock!(out, env, bl)
     ex = v.expr
     if isexpr(ex, :call)
       Ts = map(v -> nodetype(out, rename(env, v)), ex.args)
+      Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
       if (T = partial(Ts...)) != nothing
         if T isa Node
           env[k] = T.value

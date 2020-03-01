@@ -39,6 +39,9 @@ abstract(::AType{typeof(float)}, x::Const{<:Number}) = Const(float(x.value))
 abstract(::AType{typeof(convert)}, ::Const{Type{T}}, x::Const{<:Number}) where T<:Number =
   Const(convert(T, x.value))
 
+abstract(::AType{typeof(typeassert)}, x::Const, T::Const) =
+  Const(typeassert(x.value, T.value))
+
 abstract(::AType{typeof(!)}, x::AType{Bool}) = Bool
 abstract(::AType{typeof(!)}, x::Const{Bool}) = Const(!(x.value))
 

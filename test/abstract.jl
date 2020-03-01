@@ -1,6 +1,7 @@
 using Poirot.Abstract, IRTools, Test
-using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype, returntype
-using IRTools: var, returnvalue
+using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype,
+  returntype, arrayshape
+using IRTools: var, returnvalue, blocks
 
 ir = @code_ir identity(1)
 @test return_type(ir, Nothing, Int) == Int
@@ -135,3 +136,15 @@ tr = @trace pow(2, 3)
 
 tr = @trace pow(Int, Int)
 @test returntype(tr) == Int
+
+function sumabs2(xs)
+  s = zero(eltype(xs))
+  for i = 1:length(xs)
+    s += xs[i]
+  end
+  return s
+end
+
+tr = @trace sumabs2(arrayshape(Float64, 3))
+@test length(blocks(tr)) == 1
+@test returntype(tr) == Float64
