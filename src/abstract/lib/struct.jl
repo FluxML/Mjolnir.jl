@@ -49,6 +49,14 @@ function partial(::AType{typeof(getfield)}, x::Partial{T}, name::Const{Symbol}) 
   x.value[i]
 end
 
+function partial(::AType{typeof(getfield)}, x::Partial{T}, i::Const{<:Integer}) where T
+  x.value[i.value]
+end
+
+function partial(::AType{typeof(getfield)}, x::Const{T}, i::Const{<:Integer}) where T
+  Const(x.value[i.value])
+end
+
 partial(::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
   Const(getfield(x.value, name.value))
 
