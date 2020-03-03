@@ -14,6 +14,11 @@ ir = @code_ir add(1, 2)
 
 @test return_type(ir, Nothing, Int, Const(2.0)) == Float64
 
+f(x...) = x[1] + x[2]
+
+tr = @trace f(5, 7)
+@test returntype(tr) == Const(12)
+
 g = 2
 addg(x) = x+g
 ir = @code_ir addg(2)

@@ -17,6 +17,9 @@ Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 
 widen(::AType{T}) where T = T
 
+ptuple(x::Const...) = Const(map(x -> x.value, x))
+ptuple(x...) = Partial{Tuple{widen.(x)...}}((x...,))
+
 _union(::Type{Union{}}, T) = T
 _union(S::Const, T::Const) = S == T ? S : Union{widen(S),widen(T)}
 _union(S::Partial, T::Partial) = S == T ? S : Union{widen(S),widen(T)}

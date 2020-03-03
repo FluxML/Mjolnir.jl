@@ -31,10 +31,13 @@ partial(::Defaults, ::AType{typeof(__splatnew__)}, ::AType{<:Type}, xs...) = err
 
 abstract(::Defaults, ::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
-abstract(::Defaults, ::Const{typeof(tuple)}, xs::Const...) = Const((map(x -> x.value, xs)...,))
+abstract(::Defaults, ::Const{typeof(tuple)}, xs...) = ptuple(xs...)
 
-abstract(::Defaults, ::Const{typeof(tuple)}, xs...) =
-  Partial{Tuple{widen.(xs)...}}((xs...,))
+abstract(::Defaults, ::AType{typeof(getindex)}, x::Const{<:Tuple}, i::Const{<:Integer}) =
+  Const(x.value[i.value])
+
+abstract(::Defaults, ::AType{typeof(getindex)}, x::Partial{<:Tuple}, i::Const{<:Integer}) =
+  x.value[i.value]
 
 function partial(::Defaults, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))

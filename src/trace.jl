@@ -122,6 +122,13 @@ function traceblock!(P, out, env, bl)
 end
 
 function trace!(P, out, ir, args)
+  if ir.meta.method.isva
+    nargs = ir.meta.method.nargs
+    splat = args[nargs:end]
+    splat = push!(out, stmt(xcall(tuple, splat...),
+                            type = ptuple(nodetype.((out,), splat)...)))
+    args = [args[1:nargs-1]..., splat]
+  end
   env = Dict{Any,Any}(zip(arguments(ir), args))
   bl = 1
   while true
