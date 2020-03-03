@@ -9,7 +9,6 @@ export @trace
 abstract(Ts...) = nothing
 partial(Ts...) = abstract(Ts...)
 
-include("utils.jl")
 include("cleanup.jl")
 include("flow.jl")
 include("trace.jl")

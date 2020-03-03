@@ -110,7 +110,9 @@ function edge!(cx::MutCtx, x::Partial) # TODO: clear edges?
 end
 
 function visit!(cx::MutCtx, x::Partial) # TODO: can do this by key
-  push!(cx.inf.queue, get!(cx.inf.edges, x, Set())...)
+  if haskey(cx.inf.edges, x)
+    push!(cx.inf.queue, cx.inf.edges[x]...)
+  end
 end
 
 exprtype(ir, x) = IRTools.exprtype(ir, x, typeof = Const)
