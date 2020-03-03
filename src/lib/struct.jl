@@ -1,5 +1,3 @@
-abstract(::MutCtx, Ts...) = abstract(Ts...)
-
 @generated function __new__(T, args...)
   quote
     Base.@_inline_meta
@@ -60,7 +58,7 @@ end
 partial(::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
   Const(getfield(x.value, name.value))
 
-function abstract(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+function mutate(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   S = x.value[i]
   if !_issubtype(s, S)
@@ -70,7 +68,7 @@ function abstract(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::C
   x
 end
 
-function abstract(cx::MutCtx, ::AType{typeof(getfield)}, x::Partial{T}, name) where T
+function mutate(cx::MutCtx, ::AType{typeof(getfield)}, x::Partial{T}, name) where T
   edge!(cx, x)
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
@@ -89,7 +87,7 @@ function partial(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<
   x.value[name.value]
 end
 
-function abstract(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+function mutate(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
   T = get(x.value, name.value, Union{})
   if !_issubtype(s, T)
     visit!(cx, x)
@@ -98,7 +96,7 @@ function abstract(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}},
   return x
 end
 
-function abstract(cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+function mutate(cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
   edge!(cx, x)
   get(x.value, name.value, Union{})
 end

@@ -6,9 +6,7 @@ using IRTools: block
 
 export @trace
 
-abstract(Ts...) = nothing
-partial(Ts...) = abstract(Ts...)
-
+include("context.jl")
 include("cleanup.jl")
 include("flow.jl")
 include("trace.jl")

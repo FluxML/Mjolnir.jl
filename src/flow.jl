@@ -120,7 +120,7 @@ exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
-  T = abstract(MutCtx(inf, loc), Ts...)
+  T = mutate(MutCtx(inf, loc), Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
