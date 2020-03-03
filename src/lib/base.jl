@@ -49,3 +49,7 @@ abstract(::AType{typeof(repr)}, x) = String
 abstract(::AType{typeof(repr)}, x::Const) = Const(repr(x.value))
 abstract(::AType{typeof(println)}, xs...) = Nothing
 abstract(::AType{typeof(print)}, xs...) = Nothing
+
+abstract(::AType{typeof(rand)}) = Float64
+abstract(::AType{typeof(randn)}) = Float64
+abstract(::AType{typeof(rand)}, ::AType{<:Type{Bool}}) where T = Bool

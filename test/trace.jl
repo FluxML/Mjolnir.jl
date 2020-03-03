@@ -1,5 +1,5 @@
-using Poirot.Abstract, IRTools, Test
-using Poirot.Abstract: Const, Partial, Inference, return_type, @trace, exprtype,
+using Mjolnir, IRTools, Test
+using Mjolnir: Const, Partial, Inference, return_type, @trace, exprtype,
   returntype, arrayshape
 using IRTools: var, returnvalue, blocks
 

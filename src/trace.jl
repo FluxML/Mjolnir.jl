@@ -138,6 +138,7 @@ function trace!(out, ir, args)
 end
 
 function tracecall!(tr, args, Ts)
+  # @show Ts
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!

@@ -25,8 +25,8 @@ _issubtype(S, T::Type) = widen(S) <: T
 _issubtype(S, T) = S == T
 
 function instrument(ex)
-  isexpr(ex, :new) ? xcall(Abstract, :__new__, ex.args...) :
-  isexpr(ex, :splatnew) ? xcall(Abstract, :__splatnew__, ex.args...) :
+  isexpr(ex, :new) ? xcall(Mjolnir, :__new__, ex.args...) :
+  isexpr(ex, :splatnew) ? xcall(Mjolnir, :__splatnew__, ex.args...) :
   ex
 end
 

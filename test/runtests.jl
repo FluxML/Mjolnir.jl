@@ -1,21 +1,9 @@
-using Poirot, Test
+using Mjolnir, Test
 
-@testset "Poirot" begin
+@testset "Mjolnir" begin
 
-@testset "Abstract" begin
-  include("abstract.jl")
-end
-
-@testset "Compiler" begin
-  include("compiler.jl")
-end
-
-@testset "Inference" begin
-  include("inference.jl")
-end
-
-@testset "LAX" begin
-  include("lax.jl")
+@testset "Trace" begin
+  include("trace.jl")
 end
 
 end

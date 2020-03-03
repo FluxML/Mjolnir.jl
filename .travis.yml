@@ -10,6 +10,3 @@ notifications:
 matrix:
  allow_failures:
  - julia: nightly
-
-before_script:
-  - export PYTHON=""

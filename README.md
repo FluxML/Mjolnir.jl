@@ -1,134 +1,83 @@
-<p align="center">
-<img width="400px" src="https://raw.githubusercontent.com/FluxML/fluxml.github.io/master/poirot.png"/>
-</p>
+# Mjolnir
 
-[![Build Status](https://travis-ci.org/MikeInnes/Poirot.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Poirot.jl)
+[![Build Status](https://travis-ci.org/MikeInnes/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Mjolnir.jl)
 
 ```julia
-] add IRTools#master
-] add https://github.com/MikeInnes/XLATools.jl
-] add https://github.com/MikeInnes/Poirot.jl
-```
+julia> using Mjolnir
 
-Poirot contains a series of experiments in probabilistic programming, both at the interface level and in terms of the abstract tracing used to implement it. Note that as an early prototype, anything not explicitly stated to work probably doesn't.
-
-As a modelling language, Poirot has two intertwined main goals:
-
-1. Poirot's modelling language should abstract over a range of inference methods, from analytical methods, to factor graph representations, to monte carlo and ABC. Compiler analysis allows us to (automatically) choose an appropriate representation compatible with the best possible inference algorithm. There is no "static"/"dynamic" modelling distinction.
-2. If you have no idea what any of (1) means, you should still be able to use Poirot productively, learning about more advanced concepts as you go.
-
-## Probabilistic Modelling
-
-It easy to write randomised programs in Julia. They can be as short as one line!
-
-```julia
-julia> randn()
-1.3664118530820202
-```
-
-Poirot adds a new construct to Julia, the `infer` block. Infer turns a stochastic program into a deterministic one: instead of getting back a single random value, you get a distribution of possible values.
-
-```julia
-julia> using Poirot
-
-julia> infer() do
-         randn()
+julia> function pow(x, n)
+         r = 1
+         while n > 0
+           n -= 1
+           r *= x
+         end
+         return r
        end
-Normal{Float64}(μ=0.0, σ=1.0)
+pow (generic function with 1 method)
 
-julia> infer() do
-         rand(Bool)
+julia> @trace pow(Int, 3)
+1: (%1 :: const(pow), %2 :: Int64, %3 :: const(3))
+  %4 = (*)(1, %2) :: Int64
+  %5 = (*)(%4, %2) :: Int64
+  %6 = (*)(%5, %2) :: Int64
+  return %6
+
+julia> @trace pow(3, Int)
+1: (%1 :: const(pow), %2 :: const(3), %3 :: Int64)
+  %4 = (>)(%3, 0) :: Bool
+  br 3 (1) unless %4
+  br 2 (%3, 1)
+2: (%5 :: Int64, %6 :: Int64)
+  %7 = (-)(%5, 1) :: Int64
+  %8 = (*)(%6, %2) :: Int64
+  %9 = (>)(%7, 0) :: Bool
+  br 3 (%8) unless %9
+  br 2 (%7, %8)
+3: (%10 :: Int64)
+  return %10
+
+julia> function pow(x, n)
+         r = 1
+         while n > 0
+           n -= 1
+           r *= x
+           @show r
+         end
+         return r
        end
-Bernoulli{Rational{Int64}}(p=1//2)
-```
+pow (generic function with 1 method)
 
-Of course, we know what those functions return already. What about something more complex? For example: what's the chance of two coins both being heads?
+julia> @trace pow(2, 3)
+1: (%1 :: const(pow), %2 :: const(2), %3 :: const(3))
+  %4 = (println)("r = ", "2")
+  %5 = (println)("r = ", "4")
+  %6 = (println)("r = ", "8")
+  return 8
 
-```julia
-julia> coin() = rand(Bool)
-coin (generic function with 1 method)
-
-julia> coin() & coin()
-false
-
-julia> infer() do
-         coin() & coin()
+julia> function updatezero!(env)
+         if env[:x] < 0
+           env[:x] = 0
+         end
        end
-Bernoulli{Float64}(p=0.25)
-```
+updatezero! (generic function with 1 method)
 
-The second construct Poirot adds is the `observe` function. This essentially behaves like an `assert`; you provide a condition, and if it's false, it errors out.
-
-```julia
-julia> begin
-         a = coin()
-         b = coin()
-         observe(a | b)
-         a & b
+julia> function relu2(x)
+         env = Dict()
+         env[:x] = x
+         updatezero!(env)
+         return env[:x]
        end
-true
+relu2 (generic function with 1 method)
 
-julia> begin
-         a = coin()
-         b = coin()
-         observe(a | b)
-         a & b
-       end
-ERROR: Poirot.ConditionError()
+julia> @trace relu2(Int)
+1: (%1 :: const(relu2), %2 :: Int64)
+  %3 = (<)(%2, 0) :: Bool
+  br 3 unless %3
+  br 2
+2:
+  br 4 (0)
+3:
+  br 4 (%2)
+4: (%4 :: Int64)
+  return %4
 ```
-
-The key thing about `observe` is that it _changes what kinds of outputs the function produces_, since many cases now error instead of returning anything. In this case, we're effectively asking for the probability that two coins are heads _given_ that at least one of them is (implied by `observe(a | b)`).
-
-```julia
-julia> infer() do
-         a = coin()
-         b = coin()
-         observe(a | b)
-         a & b
-       end
-Bernoulli{Float64}(p=0.3333333333333333)
-```
-
-We can use this kind of probabilistic reasoning to solve all kinds of statistical problems, and it even subsumes regular logical inference. For example: If `a` or `b` is true, but `b` isn't true, `a` must be true (with 100% probability).
-
-```julia
-julia> infer() do
-         a = coin()
-         b = coin()
-         observe(a | b)
-         observe(!b)
-         a
-       end
-Singleton(true)
-```
-
-We can use this as a kind of statistical pocket calculator. For example: you took a test which is 99% accurate<sup>\*</sup>, for a disease that affects one in one hundred thousand people. Given that the test returns positive for the disease, how likely is it that you have the disease?
-
-(\*both sensitivity and specificity, for simplicity)
-
-```julia
-julia> infer() do
-         disease = rand(Bernoulli(1/100_000))
-         test = rand(Bernoulli(0.99)) ? disease : !disease
-         observe(test)
-         disease
-       end
-Bernoulli{Float64}(p=0.0009890307498651321)
-```
-
-Surprisingly, very unlikely!
-
-This also covers more advanced models, such as a linear regression (hypothetical example, since HMC is not hooked up):
-
-```julia
-x, y = # ...
-infer() do
-  slope = rand(Normal(0, 1))
-  intercept = rand(Normal(0, 1))
-  ŷ = x .* slope .+ intercept .+ randn.()
-  observe(y == ŷ)
-  slope, intercept
-end
-```
-
-Larger and more complex models can easily be factored into functions and use data structures, and to separate modelling from inference. Inference can also be easily customised with calls like `infer(HMC(...)) do ...` or `infer(model, HMC(...))`.

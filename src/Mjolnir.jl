@@ -1,8 +1,10 @@
-module Abstract
+module Mjolnir
 
 using IRTools, MacroTools
 using IRTools.All
 using IRTools: block
+
+export @trace
 
 abstract(Ts...) = nothing
 partial(Ts...) = abstract(Ts...)
@@ -14,6 +16,5 @@ include("trace.jl")
 include("lib/base.jl")
 include("lib/array.jl")
 include("lib/struct.jl")
-include("lib/random.jl")
 
-end
+end # module
