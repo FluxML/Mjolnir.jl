@@ -14,10 +14,13 @@ ir = @code_ir add(1, 2)
 
 @test return_type(ir, Nothing, Int, Const(2.0)) == Float64
 
-f(x...) = x[1] + x[2]
+f(x...) = +(x...)
 
 tr = @trace f(5, 7)
 @test returntype(tr) == Const(12)
+
+tr = @trace Base.tail((1, 2, 3))
+@test returntype(tr) == Const((2, 3))
 
 g = 2
 addg(x) = x+g

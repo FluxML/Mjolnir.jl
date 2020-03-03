@@ -4,6 +4,21 @@ rename(env, ex) = IRTools.prewalk(
 
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
+function unapply!(P, tr, Ts, args)
+  Ts[1] isa AType{typeof(Core._apply)} || return Ts, args
+  Ts′ = Any[Ts[2]]
+  args′ = Any[args[2]]
+  for (x, T) in zip(args[3:end], Ts[3:end])
+    len = partial(P, Const(length), T).value
+    for i = 1:len
+      t = partial(P, Const(getindex), T, Const(i))
+      push!(Ts′, t)
+      push!(args′, push!(tr, stmt(xcall(getindex, x, i), type = t)))
+    end
+  end
+  return Ts′, args′
+end
+
 function copyblock!(ir::IR, b)
   c = IRTools.block!(ir)
   env = Dict()
@@ -102,6 +117,7 @@ function traceblock!(P, out, env, bl)
     ex = v.expr
     if isexpr(ex, :call)
       Ts = map(v -> nodetype(out, rename(env, v)), ex.args)
+      Ts, args = unapply!(P, out, Ts, rename(env, ex).args)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
       if (T = partial(P, Ts...)) != nothing
         if T isa Node
@@ -110,7 +126,7 @@ function traceblock!(P, out, env, bl)
           env[k] = push!(out, stmt(rename(env, v.expr), type = T))
         end
       else
-        env[k] = tracecall!(P, out, rename(env, ex).args, Ts)
+        env[k] = tracecall!(P, out, args, Ts)
       end
     elseif isexpr(ex, :meta)
     elseif isexpr(ex)
@@ -145,7 +161,6 @@ function trace!(P, out, ir, args)
 end
 
 function tracecall!(P, tr, args, Ts)
-  # @show Ts
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!
