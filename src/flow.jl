@@ -97,6 +97,7 @@ struct Inference
   frames::Dict{Vector{AType},Frame}
   queue::WorkQueue{Any}
   edges::IdDict{Partial,Any}
+  primitives
 end
 
 struct MutCtx
@@ -120,7 +121,7 @@ exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
-  T = mutate(MutCtx(inf, loc), Ts...)
+  T = mutate(inf.primitives, MutCtx(inf, loc), Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
@@ -199,10 +200,10 @@ function infer!(inf::Inference)
   return inf
 end
 
-function Inference(fr::Frame)
+function Inference(fr::Frame, P)
   q = WorkQueue{Any}()
   push!(q, (fr, 1, 0, 1))
-  Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict())
+  Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict(), P)
 end
 
 function infer!(ir::IR, args...)
@@ -213,7 +214,7 @@ end
 
 function return_type(ir::IR, args...)
   fr = frame(copy(ir), args...)
-  inf = Inference(fr)
+  inf = Inference(fr, Defaults())
   infer!(inf)
   return fr.rettype
 end

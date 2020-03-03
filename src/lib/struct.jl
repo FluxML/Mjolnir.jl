@@ -12,14 +12,14 @@ end
   end
 end
 
-function partial(::Const{typeof(__new__)}, ::AType{Type{T}}, xs...) where T
+function partial(::Defaults, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs...) where T
   Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
 end
 
-partial(::Const{typeof(__new__)}, t::AType{Type{T}}, xs::Const...) where T =
-  abstract(Const(__new__), t, xs...)
+partial(::Defaults, ::Const{typeof(__new__)}, t::AType{Type{T}}, xs::Const...) where T =
+  abstract(Defaults(), Const(__new__), t, xs...)
 
-function abstract(::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) where T
+function abstract(::Defaults, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) where T
   if T.mutable
     Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
   else
@@ -27,38 +27,38 @@ function abstract(::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) wher
   end
 end
 
-partial(::AType{typeof(__splatnew__)}, ::AType{<:Type}, xs...) = error(":new not implemented")
+partial(::Defaults, ::AType{typeof(__splatnew__)}, ::AType{<:Type}, xs...) = error(":new not implemented")
 
-abstract(::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
+abstract(::Defaults, ::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
-abstract(::Const{typeof(tuple)}, xs::Const...) = Const((map(x -> x.value, xs)...,))
+abstract(::Defaults, ::Const{typeof(tuple)}, xs::Const...) = Const((map(x -> x.value, xs)...,))
 
-abstract(::Const{typeof(tuple)}, xs...) =
+abstract(::Defaults, ::Const{typeof(tuple)}, xs...) =
   Partial{Tuple{widen.(xs)...}}((xs...,))
 
-function partial(::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+function partial(::Defaults, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i] = s
   x
 end
 
-function partial(::AType{typeof(getfield)}, x::Partial{T}, name::Const{Symbol}) where T
+function partial(::Defaults, ::AType{typeof(getfield)}, x::Partial{T}, name::Const{Symbol}) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
 end
 
-function partial(::AType{typeof(getfield)}, x::Partial{T}, i::Const{<:Integer}) where T
+function partial(::Defaults, ::AType{typeof(getfield)}, x::Partial{T}, i::Const{<:Integer}) where T
   x.value[i.value]
 end
 
-function partial(::AType{typeof(getfield)}, x::Const{T}, i::Const{<:Integer}) where T
+function partial(::Defaults, ::AType{typeof(getfield)}, x::Const{T}, i::Const{<:Integer}) where T
   Const(x.value[i.value])
 end
 
-partial(::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
+partial(::Defaults, ::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
   Const(getfield(x.value, name.value))
 
-function mutate(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+function mutate(::Defaults, cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   S = x.value[i]
   if !_issubtype(s, S)
@@ -68,7 +68,7 @@ function mutate(cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Con
   x
 end
 
-function mutate(cx::MutCtx, ::AType{typeof(getfield)}, x::Partial{T}, name) where T
+function mutate(::Defaults, cx::MutCtx, ::AType{typeof(getfield)}, x::Partial{T}, name) where T
   edge!(cx, x)
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
@@ -76,18 +76,18 @@ end
 
 # Dictionaries
 
-partial(::AType{Type{Dict}}) = Partial{Dict{Any,Any}}(Dict())
+partial(::Defaults, ::AType{Type{Dict}}) = Partial{Dict{Any,Any}}(Dict())
 
-function partial(::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+function partial(::Defaults, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
   x.value[name.value] = s
   x
 end
 
-function partial(::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+function partial(::Defaults, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
   x.value[name.value]
 end
 
-function mutate(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+function mutate(::Defaults, cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
   T = get(x.value, name.value, Union{})
   if !_issubtype(s, T)
     visit!(cx, x)
@@ -96,7 +96,7 @@ function mutate(cx::MutCtx, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s
   return x
 end
 
-function mutate(cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+function mutate(::Defaults, cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
   edge!(cx, x)
   get(x.value, name.value, Union{})
 end

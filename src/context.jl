@@ -7,6 +7,10 @@
 # `abstract(F, Ts...)`: Side-effect-agnostic fallback, called by both stages of
 # compilation.
 
-abstract(Ts...) = nothing
-partial(Ts...) = abstract(Ts...)
-mutate(context, Ts...) = abstract(Ts...)
+# P is the set of primitives in use.
+
+abstract(P, Ts...) = nothing
+partial(P, Ts...) = abstract(P, Ts...)
+mutate(P, context, Ts...) = abstract(P, Ts...)
+
+struct Defaults end

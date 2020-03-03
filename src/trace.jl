@@ -68,12 +68,12 @@ function inline!(out, ir, args)
   end
 end
 
-function abstract!(out, bl, env)
+function abstract!(P, out, bl, env)
   ir, args, after = extract_group(bl)
   for i = 1:length(args)
     argtypes(ir)[i] = exprtype(out, rename(env, args[i]))
   end
-  infer!(Inference(Frame(ir)))
+  infer!(Inference(Frame(ir), P))
   inline!(out, ir, rename.((env,), args))
   for (k, v) in zip(arguments(block(bl.ir, after)), arguments(blocks(out)[end]))
     env[k] = v
@@ -97,20 +97,20 @@ _nodetype(x, T::AType) = T
 _nodetype(x, T::Type) = Node{T}(x)
 nodetype(ir::IR, x) = _nodetype(x, exprtype(ir, x))
 
-function traceblock!(out, env, bl)
+function traceblock!(P, out, env, bl)
   for (k, v) in bl
     ex = v.expr
     if isexpr(ex, :call)
       Ts = map(v -> nodetype(out, rename(env, v)), ex.args)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
-      if (T = partial(Ts...)) != nothing
+      if (T = partial(P, Ts...)) != nothing
         if T isa Node
           env[k] = T.value
         else
           env[k] = push!(out, stmt(rename(env, v.expr), type = T))
         end
       else
-        env[k] = tracecall!(out, rename(env, ex).args, Ts)
+        env[k] = tracecall!(P, out, rename(env, ex).args, Ts)
       end
     elseif isexpr(ex, :meta)
     elseif isexpr(ex)
@@ -121,41 +121,49 @@ function traceblock!(out, env, bl)
   end
 end
 
-function trace!(out, ir, args)
+function trace!(P, out, ir, args)
   env = Dict{Any,Any}(zip(arguments(ir), args))
   bl = 1
   while true
-    traceblock!(out, env, block(ir, bl))
+    traceblock!(P, out, env, block(ir, bl))
     brs = openbranches(out, env, block(ir, bl))
     if length(brs) == 1
       isreturn(brs[1]) && return rename(env, returnvalue(brs[1]))
       bl = brs[1].block
       foreach((a, b) -> env[a] = rename(env, b), arguments(block(ir, bl)), arguments(brs[1]))
     else
-      bl = abstract!(out, block(ir, bl), env)
+      bl = abstract!(P, out, block(ir, bl), env)
     end
   end
 end
 
-function tracecall!(tr, args, Ts)
+function tracecall!(P, tr, args, Ts)
   # @show Ts
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!
-  trace!(tr, ir, args)
+  trace!(P, tr, ir, args)
 end
 
-function trace(Ts...)
+function trace(P, Ts...)
   tr = IR()
   args = [argument!(tr, T) for T in Ts]
-  return!(tr, tracecall!(tr, args, Ts))
+  return!(tr, tracecall!(P, tr, args, Ts))
   return cleanup!(tr)
 end
 
 atype(T::AType) = T
 atype(x) = Const(x)
 
-macro trace(ex)
+function tracem(P, ex)
   @capture(ex, f_(args__)) || error("@trace f(args...)")
-  :(trace(atype.(($(esc(f)), $(esc.(args)...)))...))
+  :(trace($(esc(P)), atype.(($(esc(f)), $(esc.(args)...)))...))
+end
+
+macro trace(P, ex)
+  tracem(P, ex)
+end
+
+macro trace(ex)
+  tracem(Defaults(), ex)
 end
