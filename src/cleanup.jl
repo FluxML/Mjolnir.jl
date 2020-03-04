@@ -13,7 +13,7 @@ function inline_consts!(ir::IR)
         delete!(ir, v)
         env[v] = st.type.value
       else
-        ir[v] = stmt(st.type.value, type = Any)
+        ir[v] = st.type.value
       end
     end
   end
