@@ -39,6 +39,8 @@ abstract(::Defaults, ::AType{typeof(getindex)}, x::Const{<:Tuple}, i::Const{<:In
 abstract(::Defaults, ::AType{typeof(getindex)}, x::Partial{<:Tuple}, i::Const{<:Integer}) =
   x.value[i.value]
 
+abstract(::Defaults, ::AType{typeof(length)}, xs::Partial{<:Tuple}) = Const(length(xs.value))
+
 function partial(::Defaults, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i] = s

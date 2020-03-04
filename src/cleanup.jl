@@ -1,11 +1,20 @@
+istrivial(x) = isbits(x)
+istrivial(x::Type) = true
+
 function inline_consts!(ir::IR)
   env = Dict()
-  for (v, st) in ir
+  us = IRTools.Inner.usecounts(ir)
+  isused(x) = get(us, x, 0) > 0
+  for v in reverse(keys(ir))
+    st = ir[v]
     if st.type isa Union{Const,Node}
-      delete!(ir, v)
-      env[v] = st.type.value
-    else
-      env[v] = v
+      map(v -> v isa Variable && (us[v] -= 1), st.expr.args)
+      if st.type isa Node || istrivial(st.type.value) || !isused(v)
+        delete!(ir, v)
+        env[v] = st.type.value
+      else
+        ir[v] = stmt(st.type.value, type = Any)
+      end
     end
   end
   return IRTools.prewalk!(x -> get(env, x, x), ir)

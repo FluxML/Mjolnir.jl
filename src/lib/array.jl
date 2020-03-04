@@ -16,3 +16,6 @@ partial(::Defaults, ::AType{typeof(getindex)}, xs::PartialArray, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
 @pure Defaults Colon(), length
+
+abstract(::Defaults, ::AType{typeof(Broadcast.broadcasted)}, f, args...) =
+  Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
