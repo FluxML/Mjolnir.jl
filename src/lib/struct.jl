@@ -27,7 +27,9 @@ function abstract(::Defaults, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Co
   end
 end
 
-partial(::Defaults, ::AType{typeof(__splatnew__)}, ::AType{<:Type}, xs...) = error(":new not implemented")
+function partial(::Defaults, ::AType{typeof(__splatnew__)}, ::AType{Type{T}}, xs::Const{<:Tuple}) where T
+  Partial{T}(Const.(xs.value))
+end
 
 abstract(::Defaults, ::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 

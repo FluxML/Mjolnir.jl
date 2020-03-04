@@ -26,4 +26,4 @@ abstract(::Defaults, ::AType{typeof(rand)}, ::AType{<:Type{Bool}}) where T = Boo
 
 @pure Defaults +, -, *, /, &, |, ^, !, >, >=, <, <=, ==, !=, ===, sin, cos, tan, float
 
-@pure Defaults repr, println, print
+@pure Defaults repr, println, print, Core.kwfunc, isdefined
