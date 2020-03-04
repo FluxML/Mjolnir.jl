@@ -8,7 +8,7 @@ export @trace
 
 include("context.jl")
 include("cleanup.jl")
-include("flow.jl")
+include("infer.jl")
 include("trace.jl")
 include("macros.jl")
 include("lib/base.jl")
