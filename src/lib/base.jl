@@ -32,4 +32,7 @@ effectful(::AType{typeof(println)}, args...) = true
 
 @pure Defaults +, -, *, /, &, |, ^, !, >, >=, <, <=, ==, !=, ===, sin, cos, tan, float
 
+abstract(::Defaults, ::AType{typeof(===)}, a::AType{T}, b::AType{T}) where T = Bool
+abstract(::Defaults, ::AType{typeof(===)}, a, b) = Const(false)
+
 @pure Defaults repr, Core.kwfunc, isdefined
