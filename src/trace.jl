@@ -1,9 +1,23 @@
 struct Trace
   ir::IR
+  stack::Vector{Any}
   primitives
 end
 
-Trace(P) = Trace(IR(), P)
+Trace(P) = Trace(IR(), [], P)
+
+struct TraceError
+  error
+  stack
+end
+
+function Base.showerror(io::IO, e::TraceError)
+  print(io, "Tracing Error: ")
+  showerror(io, e.error)
+  for Ts in e.stack
+    print(io, "\nin ", Tuple{widen.(Ts)...})
+  end
+end
 
 rename(env, ex) = IRTools.prewalk(
   x -> x isa GlobalRef ? getfield(x.mod, x.name) :
@@ -133,7 +147,7 @@ function traceblock!(tr::Trace, env, bl)
           env[k] = push!(tr.ir, stmt(rename(env, v.expr), type = T))
         end
       else
-        env[k] = tracecall!(tr, args, Ts)
+        env[k] = tracecall!(tr, args, Ts...)
       end
     elseif isexpr(ex, :meta)
     elseif isexpr(ex)
@@ -167,18 +181,25 @@ function trace!(tr::Trace, ir, args)
   end
 end
 
-function tracecall!(tr::Trace, args, Ts)
+function tracecall!(tr::Trace, args, Ts...)
+  push!(tr.stack, Ts)
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!
-  trace!(tr, ir, args)
+  result = trace!(tr, ir, args)
+  pop!(tr.stack)
+  return result
 end
 
 function trace(P, Ts...)
   tr = Trace(P)
-  args = [argument!(tr.ir, T) for T in Ts]
-  return!(tr.ir, tracecall!(tr, args, Ts))
-  return cleanup!(tr.ir)
+  try
+    args = [argument!(tr.ir, T) for T in Ts]
+    return!(tr.ir, tracecall!(tr, args, Ts...))
+    return cleanup!(tr.ir)
+  catch e
+    throw(TraceError(e, tr.stack))
+  end
 end
 
 atype(T::AType) = T
