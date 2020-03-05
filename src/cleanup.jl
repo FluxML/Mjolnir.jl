@@ -1,5 +1,6 @@
 istrivial(x) = isbits(x)
 istrivial(x::Type) = true
+istrivial(x::String) = true
 
 function inline_consts!(ir::IR)
   env = Dict()
