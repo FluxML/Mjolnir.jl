@@ -24,6 +24,12 @@ abstract(::Defaults, ::AType{typeof(rand)}) = Float64
 abstract(::Defaults, ::AType{typeof(randn)}) = Float64
 abstract(::Defaults, ::AType{typeof(rand)}, ::AType{<:Type{Bool}}) where T = Bool
 
+abstract(::Defaults, ::AType{typeof(print)}, args...) = Nothing
+abstract(::Defaults, ::AType{typeof(println)}, args...) = Nothing
+
+effectful(::AType{typeof(print)}, args...) = true
+effectful(::AType{typeof(println)}, args...) = true
+
 @pure Defaults +, -, *, /, &, |, ^, !, >, >=, <, <=, ==, !=, ===, sin, cos, tan, float
 
-@pure Defaults repr, println, print, Core.kwfunc, isdefined
+@pure Defaults repr, Core.kwfunc, isdefined
