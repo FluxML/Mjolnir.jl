@@ -28,7 +28,7 @@ function abstract(::Defaults, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Co
 end
 
 function partial(::Defaults, ::AType{typeof(__splatnew__)}, ::AType{Type{T}}, xs::Const{<:Tuple}) where T
-  Partial{T}(Const.(xs.value))
+  Const(__splatnew__(T, xs.value))
 end
 
 abstract(::Defaults, ::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
