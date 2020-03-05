@@ -1,3 +1,10 @@
+struct Trace
+  ir::IR
+  primitives
+end
+
+Trace(P) = Trace(IR(), P)
+
 rename(env, ex) = IRTools.prewalk(
   x -> x isa GlobalRef ? getfield(x.mod, x.name) :
   x isa Variable ? env[x] : x, ex)
@@ -83,14 +90,14 @@ function inline!(out, ir, args)
   end
 end
 
-function abstract!(P, out, bl, env)
+function abstract!(tr, bl, env)
   ir, args, after = extract_group(bl)
   for i = 1:length(args)
-    argtypes(ir)[i] = exprtype(out, rename(env, args[i]))
+    argtypes(ir)[i] = exprtype(tr.ir, rename(env, args[i]))
   end
-  infer!(Inference(Frame(ir), P))
-  inline!(out, ir, rename.((env,), args))
-  for (k, v) in zip(arguments(block(bl.ir, after)), arguments(blocks(out)[end]))
+  infer!(Inference(Frame(ir), tr.primitives))
+  inline!(tr.ir, ir, rename.((env,), args))
+  for (k, v) in zip(arguments(block(bl.ir, after)), arguments(blocks(tr.ir)[end]))
     env[k] = v
   end
   return after
@@ -112,21 +119,21 @@ _nodetype(x, T::AType) = T
 _nodetype(x, T::Type) = Node{T}(x)
 nodetype(ir::IR, x) = _nodetype(x, exprtype(ir, x))
 
-function traceblock!(P, out, env, bl)
+function traceblock!(tr::Trace, env, bl)
   for (k, v) in bl
     ex = v.expr
     if isexpr(ex, :call)
-      Ts = map(v -> nodetype(out, rename(env, v)), ex.args)
-      Ts, args = unapply!(P, out, Ts, rename(env, ex).args)
+      Ts = map(v -> nodetype(tr.ir, rename(env, v)), ex.args)
+      Ts, args = unapply!(tr.primitives, tr.ir, Ts, rename(env, ex).args)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
-      if (T = partial(P, Ts...)) != nothing
+      if (T = partial(tr.primitives, Ts...)) != nothing
         if T isa Node
           env[k] = T.value
         else
-          env[k] = push!(out, stmt(rename(env, v.expr), type = T))
+          env[k] = push!(tr.ir, stmt(rename(env, v.expr), type = T))
         end
       else
-        env[k] = tracecall!(P, out, args, Ts)
+        env[k] = tracecall!(tr, args, Ts)
       end
     elseif isexpr(ex, :meta)
     elseif isexpr(ex)
@@ -137,41 +144,41 @@ function traceblock!(P, out, env, bl)
   end
 end
 
-function trace!(P, out, ir, args)
+function trace!(tr::Trace, ir, args)
   if ir.meta.method.isva
     nargs = ir.meta.method.nargs
     splat = args[nargs:end]
-    splat = push!(out, stmt(xcall(tuple, splat...),
-                            type = ptuple(nodetype.((out,), splat)...)))
+    splat = push!(tr.ir, stmt(xcall(tuple, splat...),
+                            type = ptuple(nodetype.((tr.ir,), splat)...)))
     args = [args[1:nargs-1]..., splat]
   end
   env = Dict{Any,Any}(zip(arguments(ir), args))
   bl = 1
   while true
-    traceblock!(P, out, env, block(ir, bl))
-    brs = openbranches(out, env, block(ir, bl))
+    traceblock!(tr, env, block(ir, bl))
+    brs = openbranches(tr.ir, env, block(ir, bl))
     if length(brs) == 1
       isreturn(brs[1]) && return rename(env, returnvalue(brs[1]))
       bl = brs[1].block
       foreach((a, b) -> env[a] = rename(env, b), arguments(block(ir, bl)), arguments(brs[1]))
     else
-      bl = abstract!(P, out, block(ir, bl), env)
+      bl = abstract!(tr, block(ir, bl), env)
     end
   end
 end
 
-function tracecall!(P, tr, args, Ts)
+function tracecall!(tr::Trace, args, Ts)
   ir = IR(widen.(Ts)...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!
-  trace!(P, tr, ir, args)
+  trace!(tr, ir, args)
 end
 
 function trace(P, Ts...)
-  tr = IR()
-  args = [argument!(tr, T) for T in Ts]
-  return!(tr, tracecall!(P, tr, args, Ts))
-  return cleanup!(tr)
+  tr = Trace(P)
+  args = [argument!(tr.ir, T) for T in Ts]
+  return!(tr.ir, tracecall!(tr, args, Ts))
+  return cleanup!(tr.ir)
 end
 
 atype(T::AType) = T
