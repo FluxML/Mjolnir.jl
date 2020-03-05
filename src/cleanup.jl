@@ -21,6 +21,22 @@ function inline_consts!(ir::IR)
   return IRTools.prewalk!(x -> get(env, x, x), ir)
 end
 
+effectful(f, args...) = false
+
+# TODO: handle control flow
+# should be a dataflow analysis similar to blockarg pruning
+function deadcode!(ir::IR)
+  us = IRTools.Inner.usecounts(ir)
+  isused(x) = get(us, x, 0) > 0
+  for v in reverse(keys(ir))
+    if !isused(v) && !effectful(exprtype.((ir,), ir[v].expr.args)...)
+      map(v -> v isa Variable && (us[v] -= 1), ir[v].expr.args)
+      delete!(ir, v)
+    end
+  end
+  return ir
+end
+
 function partials!(ir::IR)
   slots = IdDict()
   slot(k, T) = Base.@get!(slots, k, Slot(gensym(:partial), T))
@@ -65,4 +81,4 @@ function trimblocks!(ir)
 end
 
 cleanup!(ir) =
-  ir |> inline_consts! |> partials! |> ssa! |> prune! |> renumber
+  ir |> inline_consts! |> partials! |> ssa! |> prune! |> deadcode! |> renumber
