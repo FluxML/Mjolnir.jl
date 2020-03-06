@@ -11,7 +11,7 @@ abstract(::Defaults, ::AType{typeof(typeof)}, x::Const) = Const(widen(x))
 abstract(::Defaults, ::AType{typeof(typeof)}, x::AType{T}) where T =
   isconcretetype(T) ? Const(T) : Type
 
-abstract(::Defaults, ::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{Symbol}) =
+abstract(::Defaults, ::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{<:Union{Symbol,Integer}}) =
   Const(fieldtype(T.value, f.value))
 
 abstract(::Defaults, ::AType{typeof(convert)}, ::Const{Type{T}}, x::Const{<:Number}) where T<:Number =
