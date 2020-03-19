@@ -13,4 +13,21 @@ abstract(P, Ts...) = nothing
 partial(P, Ts...) = abstract(P, Ts...)
 mutate(P, context, Ts...) = abstract(P, Ts...)
 
-struct Defaults end
+function something(f, xs)
+  for x in xs
+    y = f(x)
+    y === nothing || return y
+  end
+  return
+end
+
+struct Multi{Ps<:Tuple}
+  ps::Ps
+  Multi(ps...) = new{typeof(ps)}(ps)
+end
+
+abstract(m::Multi, Ts...) = something(p -> abstract(p, Ts...), m.ps)
+partial(m::Multi, Ts...)  = something(p ->  partial(p, Ts...), m.ps)
+mutate(m::Multi, cx, Ts...)  = something(p ->  mutate(p, cx, Ts...), m.ps)
+
+Defaults() = Multi(Basic(), Numeric())
