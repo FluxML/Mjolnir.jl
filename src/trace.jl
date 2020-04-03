@@ -148,7 +148,7 @@ function traceblock!(tr::Trace, env, bl)
         if T isa Node
           env[k] = T.value
         else
-          env[k] = push!(tr.ir, stmt(rename(env, v.expr), type = T))
+          env[k] = push!(tr.ir, stmt(Expr(:call, args...), type = T))
         end
       else
         env[k] = tracecall!(tr, args, Ts...)
