@@ -26,6 +26,10 @@ rename(env, ex) = IRTools.prewalk(
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
 function unapply!(P, tr, Ts, args)
+  if VERSION > v"1.4-" && Ts[1] isa AType{typeof(Core._apply_iterate)}
+    Ts = [Const(Core._apply), Ts[3:end]...]
+    args = [Core._apply, args[3:end]...]
+  end
   Ts[1] isa AType{typeof(Core._apply)} || return Ts, args
   Ts′ = Any[Ts[2]]
   args′ = Any[args[2]]
