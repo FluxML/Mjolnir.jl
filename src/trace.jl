@@ -137,6 +137,12 @@ _nodetype(x, T::AType) = T
 _nodetype(x, T::Type) = Node{T}(x)
 nodetype(ir::IR, x) = _nodetype(x, exprtype(ir, x))
 
+function replacement(P, args, Ts)
+  r = instead(P, args, Ts...)
+  r === nothing && return (args, Ts)
+  return r
+end
+
 function traceblock!(tr::Trace, env, bl)
   for (k, v) in bl
     ex = v.expr
@@ -144,6 +150,7 @@ function traceblock!(tr::Trace, env, bl)
       Ts = map(v -> nodetype(tr.ir, rename(env, v)), ex.args)
       Ts, args = unapply!(tr.primitives, tr.ir, Ts, rename(env, ex).args)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
+      args, Ts = replacement(tr.primitives, args, Ts)
       if (T = partial(tr.primitives, Ts...)) != nothing
         if T isa Node
           env[k] = T.value

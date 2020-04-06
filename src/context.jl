@@ -9,6 +9,7 @@
 
 # P is the set of primitives in use.
 
+instead(P, args, Ts...) = nothing
 abstract(P, Ts...) = nothing
 partial(P, Ts...) = abstract(P, Ts...)
 mutate(P, context, Ts...) = abstract(P, Ts...)
@@ -26,6 +27,7 @@ struct Multi{Ps<:Tuple}
   Multi(ps...) = new{typeof(ps)}(ps)
 end
 
+instead(m::Multi, args, Ts...) = something(p -> instead(p, args, Ts...), m.ps)
 abstract(m::Multi, Ts...) = something(p -> abstract(p, Ts...), m.ps)
 partial(m::Multi, Ts...)  = something(p ->  partial(p, Ts...), m.ps)
 mutate(m::Multi, cx, Ts...)  = something(p ->  mutate(p, cx, Ts...), m.ps)
