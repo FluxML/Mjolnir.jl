@@ -164,7 +164,7 @@ function traceblock!(tr::Trace, env, bl)
     elseif isexpr(ex)
       error("Can't trace through $(ex.head) expression")
     else
-      env[k] = ex
+      env[k] = rename(env, ex)
     end
   end
 end
