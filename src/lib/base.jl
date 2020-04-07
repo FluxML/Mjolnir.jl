@@ -27,5 +27,6 @@ abstract(::Basic, ::AType{typeof(println)}, args...) = Nothing
 
 effectful(::AType{typeof(print)}, args...) = true
 effectful(::AType{typeof(println)}, args...) = true
+effectful(::AType{typeof(setindex!)}, args...) = true
 
 @pure Basic repr, Core.kwfunc, isdefined
