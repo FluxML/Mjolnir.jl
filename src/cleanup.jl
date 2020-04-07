@@ -29,8 +29,11 @@ function deadcode!(ir::IR)
   us = IRTools.Inner.usecounts(ir)
   isused(x) = get(us, x, 0) > 0
   for v in reverse(keys(ir))
-    if !isused(v) && !effectful(exprtype.((ir,), ir[v].expr.args)...)
-      map(v -> v isa Variable && (us[v] -= 1), ir[v].expr.args)
+    if !isused(v)
+      if isexpr(ir[v].expr)
+        effectful(exprtype.((ir,), ir[v].expr.args)...) && continue
+        map(v -> v isa Variable && (us[v] -= 1), ir[v].expr.args)
+      end
       delete!(ir, v)
     end
   end
