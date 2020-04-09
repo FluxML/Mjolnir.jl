@@ -33,6 +33,8 @@ function deadcode!(ir::IR)
       if isexpr(ir[v].expr)
         effectful(exprtype.((ir,), ir[v].expr.args)...) && continue
         map(v -> v isa Variable && (us[v] -= 1), ir[v].expr.args)
+      else ir[v].expr isa Variable
+        us[ir[v].expr] -= 1
       end
       delete!(ir, v)
     end
