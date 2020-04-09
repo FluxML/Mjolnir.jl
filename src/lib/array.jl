@@ -15,7 +15,7 @@ abstract(::Basic, ::AType{typeof(eltype)}, xs::AType{<:AbstractArray{T}}) where 
 partial(::Basic, ::AType{typeof(getindex)}, xs::PartialArray, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
-@pure Basic Colon(), length
+@pure Basic Colon(), length, size
 
 abstract(::Basic, ::AType{typeof(Broadcast.broadcasted)}, f, args...) =
   Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})

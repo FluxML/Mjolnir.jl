@@ -13,6 +13,8 @@ abstract(::Basic, ::AType{typeof(typeof)}, x::Const) = Const(widen(x))
 abstract(::Basic, ::AType{typeof(typeof)}, x::AType{T}) where T =
   isconcretetype(T) ? Const(T) : Type
 
+abstract(::Basic, ::AType{typeof(isa)}, x, ::AType{Type{T}}) where T = Const(widen(x) <: T)
+
 abstract(::Basic, ::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{<:Union{Symbol,Integer}}) =
   Const(fieldtype(T.value, f.value))
 
@@ -24,6 +26,9 @@ abstract(::Basic, ::AType{typeof(typeassert)}, x::Const, T::Const) =
 
 abstract(::Basic, ::AType{typeof(print)}, args...) = Nothing
 abstract(::Basic, ::AType{typeof(println)}, args...) = Nothing
+
+abstract(::Basic, ::AType{typeof(ifelse)}, c::Const{Bool}, a, b) =
+  c.value ? a : b
 
 effectful(::AType{typeof(print)}, args...) = true
 effectful(::AType{typeof(println)}, args...) = true
