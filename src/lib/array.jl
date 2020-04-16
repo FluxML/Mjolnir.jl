@@ -19,3 +19,6 @@ partial(::Basic, ::AType{typeof(getindex)}, xs::PartialArray, i::Const...) =
 
 abstract(::Basic, ::AType{typeof(Broadcast.broadcasted)}, f, args...) =
   Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
+
+abstract(::Basic, ::AType{typeof(mapreduce)}, f, op, A) =
+  Core.Compiler.return_type(mapreduce, Tuple{widen(f),widen(op),widen(A)})
