@@ -21,7 +21,7 @@ end
 
 rename(env, ex) = IRTools.prewalk(
   x -> x isa GlobalRef ? getfield(x.mod, x.name) :
-  x isa Variable ? env[x] : x, ex)
+       x isa Variable ? env[x] : x, ex)
 
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
