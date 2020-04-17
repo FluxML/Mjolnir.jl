@@ -210,7 +210,7 @@ function trace(P, Ts...)
     argnames = [argument!(tr.ir, T) for T in Ts]
     args = [T isa Const ? T.value : arg for (T, arg) in zip(Ts, argnames)]
     if (T = partial(tr.primitives, Ts...)) != nothing
-      return!(tr.ir, push!(tr.ir, Expr(:call, args...)))
+      return!(tr.ir, push!(tr.ir, stmt(Expr(:call, args...), type = T)))
     else
       return!(tr.ir, tracecall!(tr, args, Ts...))
     end
