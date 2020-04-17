@@ -21,8 +21,7 @@ abstract(::Basic, ::AType{typeof(fieldtype)}, T::Const{<:Type}, f::Const{<:Union
 abstract(::Basic, ::AType{typeof(convert)}, ::Const{Type{T}}, x::Const{<:Number}) where T<:Number =
   Const(convert(T, x.value))
 
-abstract(::Basic, ::AType{typeof(typeassert)}, x::Const, T::Const) =
-  Const(typeassert(x.value, T.value))
+abstract(::Basic, ::AType{typeof(typeassert)}, x::AType{X}, ::AType{Type{T}}) where {T,X<:T} = x
 
 abstract(::Basic, ::AType{typeof(print)}, args...) = Nothing
 abstract(::Basic, ::AType{typeof(println)}, args...) = Nothing
