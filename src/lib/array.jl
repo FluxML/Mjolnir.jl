@@ -3,22 +3,24 @@ arrayshape(::Type{Array{T,N}}, sz...) where {T,N} =
 
 arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
-abstract(::Basic, ::AType{typeof(getindex)}, xs::Const{<:Array}, i::Const...) =
+@abstract Basic getindex(xs::Const{<:Array}, i::Const...) =
   Const(xs.value[map(i -> i.value, i)...])
 
 PartialArray{T,N} = Partial{Array{T,N}}
+ConstArray{T,N} = Const{Array{T,N}}
 
-abstract(::Basic, ::AType{typeof(length)}, xs::PartialArray) = Const(length(xs.value))
+@abstract Basic length(xs::Const) = Const(length(xs.value))
+@abstract Basic length(xs::PartialArray) = Const(length(xs.value))
 
-abstract(::Basic, ::AType{typeof(eltype)}, xs::AType{<:AbstractArray{T}}) where T = T
+@abstract Basic eltype(xs::AType{<:AbstractArray{T}}) where T = T
 
-partial(::Basic, ::AType{typeof(getindex)}, xs::PartialArray, i::Const...) =
+@partial Basic getindex(xs::PartialArray, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
-@pure Basic Colon(), length, size
+@pure Basic Colon(), size
 
-abstract(::Basic, ::AType{typeof(Broadcast.broadcasted)}, f, args...) =
+@abstract Basic Broadcast.broadcasted(f, args...) =
   Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
 
-abstract(::Basic, ::AType{typeof(mapreduce)}, f, op, A) =
+@abstract Basic mapreduce(f, op, A) =
   Core.Compiler.return_type(mapreduce, Tuple{widen(f),widen(op),widen(A)})

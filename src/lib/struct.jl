@@ -12,14 +12,14 @@ end
   end
 end
 
-function partial(::Basic, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs...) where T
+@partial Basic function __new__(::AType{Type{T}}, xs...) where T
   Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
 end
 
-partial(::Basic, ::Const{typeof(__new__)}, t::AType{Type{T}}, xs::Const...) where T =
+@partial Basic __new__(t::AType{Type{T}}, xs::Const...) where T =
   abstract(Basic(), Const(__new__), t, xs...)
 
-function abstract(::Basic, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const...) where T
+@abstract Basic function __new__(::AType{Type{T}}, xs::Const...) where T
   if T.mutable
     Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
   else
@@ -27,42 +27,42 @@ function abstract(::Basic, ::Const{typeof(__new__)}, ::AType{Type{T}}, xs::Const
   end
 end
 
-function partial(::Basic, ::AType{typeof(__splatnew__)}, ::AType{Type{T}}, xs::Const{<:Tuple}) where T
+@partial Basic function __splatnew__(::AType{Type{T}}, xs::Const{<:Tuple}) where T
   Const(__splatnew__(T, xs.value))
 end
 
-abstract(::Basic, ::Const{typeof(tuple)}, xs::Type...) = Tuple{xs...}
+abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
-abstract(::Basic, ::Const{typeof(tuple)}, xs...) = ptuple(xs...)
+@abstract Basic tuple(xs...) = ptuple(xs...)
 
-abstract(::Basic, ::AType{typeof(getindex)}, x::Const{<:Tuple}, i::Const{<:Integer}) =
+@abstract Basic getindex(x::Const{<:Tuple}, i::Const{<:Integer}) =
   Const(x.value[i.value])
 
-abstract(::Basic, ::AType{typeof(getindex)}, x::Partial{<:Tuple}, i::Const{<:Integer}) =
+@abstract Basic getindex(x::Partial{<:Tuple}, i::Const{<:Integer}) =
   x.value[i.value]
 
-abstract(::Basic, ::AType{typeof(length)}, xs::Partial{<:Tuple}) = Const(length(xs.value))
+@abstract Basic length(xs::Partial{<:Tuple}) = Const(length(xs.value))
 
-function partial(::Basic, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
+@partial Basic function setfield!(x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i] = s
   x
 end
 
-function partial(::Basic, ::AType{typeof(getfield)}, x::Partial{T}, name::Const{Symbol}) where T
+@partial Basic function getfield(x::Partial{T}, name::Const{Symbol}) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
   x.value[i]
 end
 
-function partial(::Basic, ::AType{typeof(getfield)}, x::Partial{T}, i::Const{<:Integer}) where T
+@partial Basic function getfield(x::Partial{T}, i::Const{<:Integer}) where T
   x.value[i.value]
 end
 
-function partial(::Basic, ::AType{typeof(getfield)}, x::Const{T}, i::Const{<:Integer}) where T
+@partial Basic function getfield(x::Const{T}, i::Const{<:Integer}) where T
   Const(x.value[i.value])
 end
 
-partial(::Basic, ::AType{typeof(getfield)}, x::Const, name::Const{Symbol}) =
+@partial Basic getfield(x::Const, name::Const{Symbol}) =
   Const(getfield(x.value, name.value))
 
 function mutate(::Basic, cx::MutCtx, ::AType{typeof(setfield!)}, x::Partial{T}, name::Const{Symbol}, s) where T
@@ -83,14 +83,14 @@ end
 
 # Dictionaries
 
-partial(::Basic, ::AType{Type{Dict}}) = Partial{Dict{Any,Any}}(Dict())
+@partial Basic Dict() = Partial{Dict{Any,Any}}(Dict())
 
-function partial(::Basic, ::AType{typeof(setindex!)}, x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+@partial Basic function setindex!(x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
   x.value[name.value] = s
   x
 end
 
-function partial(::Basic, ::AType{typeof(getindex)}, x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
+@partial Basic function getindex(x::Partial{Dict{K,V}}, name::Const{<:K}) where {K,V}
   x.value[name.value]
 end
 
@@ -108,8 +108,8 @@ function mutate(::Basic, cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{
   get(x.value, name.value, Union{})
 end
 
-abstract(::Basic, ::AType{typeof(===)}, a::Const{T}, b::Const{T}) where T =
+@abstract Basic (===)(a::Const{T}, b::Const{T}) where T =
   Const(a.value === b.value)
 
-abstract(::Basic, ::AType{typeof(===)}, a::AType{T}, b::AType{T}) where T = Bool
-abstract(::Basic, ::AType{typeof(===)}, a, b) = Const(false)
+@abstract Basic (===)(a::AType{T}, b::AType{T}) where T = Bool
+@abstract Basic (===)(a, b) = Const(false)
