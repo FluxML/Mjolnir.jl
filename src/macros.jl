@@ -25,6 +25,9 @@ named(arg) = isexpr(arg, :(::)) && length(arg.args) == 1 ? :($(gensym())::$(arg.
 typeless(x) = MacroTools.postwalk(x -> isexpr(x, :(::), :kw) ? x.args[1] : x, x)
 isvararg(x) = isexpr(x, :(::)) && namify(x.args[2]) == :Vararg
 
+wraptype(x) = namify(x) in (:Partial, :Const, :AType) ? x : :(Mjolnir.AType{<:$x})
+wraptypes(x) = MacroTools.postwalk(x -> isexpr(x, :(::)) ? Expr(:(::), x.args[1], wraptype(x.args[2])) : x, x)
+
 function abstractm(ex, P, abstract)
   @capture(shortdef(ex), (name_(args__) = body_) |
                          (name_(args__) where {Ts__} = body_)) || error("Need a function definition")
@@ -36,6 +39,7 @@ function abstractm(ex, P, abstract)
   args = named.(args)
   argnames = Any[typeless(arg) for arg in args]
   !isempty(args) && isvararg(args[end]) && (argnames[end] = :($(argnames[end])...,))
+  args = wraptypes.(args)
   args = esc.(args)
   argnames = esc.(argnames)
   Ts = esc.(Ts)

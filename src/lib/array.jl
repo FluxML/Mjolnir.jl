@@ -6,15 +6,12 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @abstract Basic getindex(xs::Const{<:Array}, i::Const...) =
   Const(xs.value[map(i -> i.value, i)...])
 
-PartialArray{T,N} = Partial{Array{T,N}}
-ConstArray{T,N} = Const{Array{T,N}}
-
 @abstract Basic length(xs::Const) = Const(length(xs.value))
-@abstract Basic length(xs::PartialArray) = Const(length(xs.value))
+@abstract Basic length(xs::Partial{<:Array}) = Const(length(xs.value))
 
-@abstract Basic eltype(xs::AType{<:AbstractArray{T}}) where T = T
+@abstract Basic eltype(xs::AbstractArray{T}) where T = T
 
-@partial Basic getindex(xs::PartialArray, i::Const...) =
+@partial Basic getindex(xs::Partial{<:Array}, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
 @pure Basic Colon(), size

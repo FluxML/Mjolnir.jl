@@ -12,14 +12,14 @@ end
   end
 end
 
-@partial Basic function __new__(::AType{Type{T}}, xs...) where T
+@partial Basic function __new__(::Type{T}, xs...) where T
   Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
 end
 
-@partial Basic __new__(t::AType{Type{T}}, xs::Const...) where T =
+@partial Basic __new__(t::Type{T}, xs::Const...) where T =
   abstract(Basic(), Const(__new__), t, xs...)
 
-@abstract Basic function __new__(::AType{Type{T}}, xs::Const...) where T
+@abstract Basic function __new__(::Type{T}, xs::Const...) where T
   if T.mutable
     Partial{T}(Any[i > length(xs) ? Union{} : xs[i] for i in 1:length(fieldnames(T))])
   else
@@ -27,7 +27,7 @@ end
   end
 end
 
-@partial Basic function __splatnew__(::AType{Type{T}}, xs::Const{<:Tuple}) where T
+@partial Basic function __splatnew__(::Type{T}, xs::Const{<:Tuple}) where T
   Const(__splatnew__(T, xs.value))
 end
 
@@ -85,7 +85,7 @@ end
 
 @partial Basic Dict() = Partial{Dict{Any,Any}}(Dict())
 
-@partial Basic function setindex!(x::Partial{Dict{K,V}}, s::AType{<:V}, name::Const{<:K}) where {K,V}
+@partial Basic function setindex!(x::Partial{Dict{K,V}}, s::V, name::Const{<:K}) where {K,V}
   x.value[name.value] = s
   x
 end
