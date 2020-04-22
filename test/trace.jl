@@ -156,3 +156,11 @@ end
 tr = @trace sumabs2(arrayshape(Float64, 3))
 @test length(blocks(tr)) == 1
 @test returntype(tr) == Float64
+
+f(xs) = sum(xs)
+tr = @trace f(Matrix{Int32})
+@test returntype(tr) == Int32
+
+f(xs) = sum(xs, dims = 1)
+tr = @trace f(Matrix{Int32})
+@test returntype(tr) == Matrix{Int32}
