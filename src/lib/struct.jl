@@ -113,3 +113,5 @@ end
 
 @abstract Basic (===)(a::AType{T}, b::AType{T}) where T = Bool
 @abstract Basic (===)(a, b) = Const(false)
+
+@abstract Basic isempty(x::Const) = Const(isempty(x.value))
