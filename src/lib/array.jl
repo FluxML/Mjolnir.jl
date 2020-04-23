@@ -19,5 +19,5 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @abstract Basic Broadcast.broadcasted(f, args...) =
   Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
 
-@abstract Basic mapreduce(f, op, A) =
+@abstract Basic mapreduce(f, op, A; dims = :) =
   Core.Compiler.return_type(mapreduce, Tuple{widen(f),widen(op),widen(A)})
