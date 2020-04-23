@@ -52,10 +52,10 @@ function abstractm(ex, P, abstract)
   func = @q f($(fargs...)) where $(Ts...) = $(esc(body))
   quote
     $func
-    function Mjolnir.$abstract(::$P, $f::AType{<:$T}, $(args...)) where $(Ts...)
+    function Mjolnir.$abstract(::$(esc(P)), $f::AType{<:$T}, $(args...)) where $(Ts...)
       f($f, $(argnames...))
     end
-    function Mjolnir.$abstract(::$P, ::AType{<:Core.kwftype($T)}, kw, $f::AType{<:$T}, $(args...)) where $(Ts...)
+    function Mjolnir.$abstract(::$(esc(P)), ::AType{<:Core.kwftype($T)}, kw, $f::AType{<:$T}, $(args...)) where $(Ts...)
       f($f, $(argnames...); unwrap_kw(kw)...)
     end
     nothing
