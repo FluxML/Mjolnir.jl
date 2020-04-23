@@ -33,4 +33,13 @@ effectful(::AType{typeof(print)}, args...) = true
 effectful(::AType{typeof(println)}, args...) = true
 effectful(::AType{typeof(setindex!)}, args...) = true
 
-@pure Basic repr, Core.kwfunc, isdefined
+@pure Basic repr, isdefined
+
+# Tweaked kwarg func handling
+
+struct KwFunc{F} end
+
+@abstract Basic Core.kwfunc(::T) where T = KwFunc{T}
+
+instead(::Basic, args, ::AType{KwFunc{F}}, kw, f, xs...) where F =
+  args, (Core.kwftype(widen(f)), kw, f, xs...)
