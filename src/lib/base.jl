@@ -29,6 +29,9 @@ struct Basic end
 @abstract Basic ifelse(c::Const{Bool}, a, b) =
   c.value ? a : b
 
+@abstract Basic !(::Bool) = Bool
+@abstract Basic !(x::Const{Bool}) = Const(!x.value)
+
 effectful(::AType{typeof(print)}, args...) = true
 effectful(::AType{typeof(println)}, args...) = true
 effectful(::AType{typeof(setindex!)}, args...) = true
