@@ -1,3 +1,5 @@
+import Base: hash, ==
+
 mutable struct Partial{T}
   value
 end
@@ -9,6 +11,11 @@ end
 
 struct Node{T}
   value::Variable
+end
+
+for T in :[Partial, Const, Node].args
+  @eval hash(x::$T, h::UInt64) = hash($T, hash(x.value, h))
+  @eval x::$T == y::$T = x.value == y.value
 end
 
 const AType{T} = Union{Type{T},Const{T},Partial{T},Node{T}}
