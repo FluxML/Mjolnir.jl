@@ -209,6 +209,7 @@ function trace(P, Ts...)
   try
     argnames = [argument!(tr.ir, T) for T in Ts]
     args = [T isa Const ? T.value : arg for (T, arg) in zip(Ts, argnames)]
+    args, Ts = replacement(P, args, Ts)
     if (T = partial(tr.primitives, Ts...)) != nothing
       return!(tr.ir, push!(tr.ir, stmt(Expr(:call, args...), type = T)))
     else
