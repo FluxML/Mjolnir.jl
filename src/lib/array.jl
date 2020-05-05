@@ -9,10 +9,12 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @abstract Basic length(xs::Const) = Const(length(xs.value))
 @abstract Basic length(xs::Partial{<:Array}) = Const(length(xs.value))
 @abstract Basic length(xs::Shape{<:Array}) = Const(prod(size(xs)))
+@abstract Basic length(xs::Array) = Int
 
 @abstract Basic size(xs::Const) = Const(size(xs.value))
 @abstract Basic size(xs::Partial{<:Array}) = Const(size(xs.value))
 @abstract Basic size(xs::Shape{<:Array}) = Const(size(xs))
+@abstract Basic size(xs::Array{T,N}) where {T,N} = NTuple{N,Int}
 
 @abstract Basic eltype(xs::AbstractArray{T}) where T = T
 
