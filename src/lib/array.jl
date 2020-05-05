@@ -16,7 +16,7 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @pure Basic Colon(), size
 
-@abstract Basic Broadcast.broadcasted(f, args...) =
+@abstract Basic Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...) =
   Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
 
 @abstract Basic mapreduce(f, op, A; dims = :) =
