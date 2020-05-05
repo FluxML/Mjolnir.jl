@@ -9,20 +9,26 @@ struct Const{T}
   Const(x) = new{Core.Typeof(x)}(x)
 end
 
+struct Shape{T}
+  size::NTuple{N,Int} where N
+end
+
 struct Node{T}
   value::Variable
 end
 
-for T in :[Partial, Const, Node].args
-  @eval hash(x::$T, h::UInt64) = hash($T, hash(x.value, h))
-  @eval x::$T == y::$T = x.value == y.value
+for T in :[Partial, Const, Shape, Node].args
+  @eval hash(x::$T, h::UInt64) = hash($T, hash(getfield(x, 1), h))
+  @eval x::$T == y::$T = getfield(x, 1) == getfield(y, 1)
 end
 
-const AType{T} = Union{Type{T},Const{T},Partial{T},Node{T}}
+const AType{T} = Union{Type{T},Const{T},Shape{T},Partial{T},Node{T}}
 
 Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 
 widen(::AType{T}) where T = T
+Base.eltype(x::Shape) = eltype(widen(x))
+Base.size(x::Shape) = x.size
 
 ptuple() = Const(())
 ptuple(x::Const...) = Const(map(x -> x.value, x))
