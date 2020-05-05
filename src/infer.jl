@@ -24,7 +24,9 @@ Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 
 widen(::AType{T}) where T = T
 
+ptuple() = Const(())
 ptuple(x::Const...) = Const(map(x -> x.value, x))
+ptuple(x::Type...) = Tuple{x...}
 ptuple(x...) = Partial{Tuple{widen.(x)...}}((x...,))
 
 _union(::Type{Union{}}, T) = T
