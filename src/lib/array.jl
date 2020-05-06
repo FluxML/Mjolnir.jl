@@ -13,7 +13,7 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @abstract Basic size(xs::Const) = Const(size(xs.value))
 @abstract Basic size(xs::Partial{<:Array}) = Const(size(xs.value))
-@abstract Basic size(xs::Shape{<:Array}) = Const(size(xs))
+@abstract Basic size(xs::Shape{Array{T,N}}) where {T,N} = Const(size(xs))
 @abstract Basic size(xs::Array{T,N}) where {T,N} = NTuple{N,Int}
 
 @abstract Basic eltype(xs::AbstractArray{T}) where T = T
@@ -23,8 +23,14 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @pure Basic Colon()
 
-@abstract Basic Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...) =
-  Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
+@abstract Basic function Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...)
+  A = Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
+  if args isa Tuple{Vararg{Union{Const,Shape,AType{<:Number}}}} && !(args isa Tuple{Vararg{AType{<:Number}}})
+    return Shape{A}(Broadcast.broadcast_shape(size.(args)...))
+  else
+    return A
+  end
+end
 
 @abstract Basic mapreduce(f, op, A; dims = :) =
   Core.Compiler.return_type(mapreduce, Tuple{widen(f),widen(op),widen(A)})
