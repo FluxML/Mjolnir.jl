@@ -9,7 +9,7 @@ struct Const{T}
   Const(x) = new{Core.Typeof(x)}(x)
 end
 
-struct Shape{T}
+mutable struct Shape{T}
   size::NTuple{N,Int} where N
 end
 
