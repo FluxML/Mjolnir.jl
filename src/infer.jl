@@ -29,8 +29,11 @@ Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 widen(::AType{T}) where T = T
 Base.eltype(x::Shape) = eltype(widen(x))
 Base.size(x::Shape) = x.size
+
 Base.size(x::Const{<:Array}) = size(x.value)
+Base.eltype(x::Const{<:Array}) = eltype(x.value)
 Base.size(::AType{<:Number}) = ()
+Base.eltype(T::AType{<:Number}) = widen(T)
 
 ptuple() = Const(())
 ptuple(x::Const...) = Const(map(x -> x.value, x))
