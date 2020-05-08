@@ -49,7 +49,7 @@ function unapply!(tr, Ts, args)
       push!(args′, ex)
     end
   end
-  return Ts′, args′
+  return unapply!(tr, Ts′, args′)
 end
 
 function copyblock!(ir::IR, b)

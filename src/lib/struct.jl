@@ -31,6 +31,10 @@ end
   Const(__splatnew__(T, xs.value))
 end
 
+@partial Basic function __splatnew__(::Type{T}, xs::Partial{<:Tuple}) where T
+  Partial{T}(Any[i > length(xs.value) ? Union{} : xs.value[i] for i in 1:length(fieldnames(T))])
+end
+
 abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
 @abstract Basic tuple(xs...) = ptuple(xs...)

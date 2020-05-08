@@ -14,14 +14,20 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @abstract Basic size(xs::Const) = Const(size(xs.value))
 @abstract Basic size(xs::Partial{<:Array}) = Const(size(xs.value))
 @abstract Basic size(xs::Shape{Array{T,N}}) where {T,N} = Const(size(xs))
-@abstract Basic size(xs::Array{T,N}) where {T,N} = NTuple{N,Int}
+@abstract Basic size(xs::AType{Array{T,N}}) where {T,N} = NTuple{N,Int}
 
 @abstract Basic eltype(xs::AbstractArray{T}) where T = T
 
 @partial Basic getindex(xs::Partial{<:Array}, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
-@pure Basic Colon()
+@abstract Basic Vector{Any}() = Partial{Vector{Any}}([])
+
+@partial Basic push!(xs::Partial{Vector{T}}, x::T) where T = (push!(xs.value, x); xs)
+
+@partial Basic pop!(xs::Partial{Vector{T}}) where T = pop!(xs.value)
+
+@pure Basic Colon(), similar
 
 @abstract Basic function Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...)
   A = Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
