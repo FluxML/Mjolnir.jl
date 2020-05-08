@@ -1,6 +1,7 @@
 struct Numeric end
 
-@pure Numeric +, -, *, /, &, |, ^, !, >, >=, <, <=, ==, !=, sin, cos, tan, sqrt, float
+@pure Numeric +, -, *, /, &, |, ^, !, >, >=, <, <=, ==, !=, sin, cos, tan, sqrt, float,
+  trailing_zeros, >>, <<, abs, unsigned, rem
 
 @abstract Numeric rand() = Float64
 @abstract Numeric randn() = Float64
