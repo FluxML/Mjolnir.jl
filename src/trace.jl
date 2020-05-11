@@ -172,7 +172,7 @@ function traceblock!(tr::Trace, env, bl)
         env[k] = tracecall!(tr, args, Ts...)
       end
     elseif isexpr(ex, :meta)
-    elseif isexpr(ex, :boundscheck)
+    elseif isexpr(ex, :boundscheck, :inbounds)
       env[k] = true
     elseif isexpr(ex)
       error("Can't trace through $(ex.head) expression")
