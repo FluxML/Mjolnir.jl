@@ -1,3 +1,5 @@
+import Base: hash, ==
+
 mutable struct Partial{T}
   value
 end
@@ -7,17 +9,35 @@ struct Const{T}
   Const(x) = new{Core.Typeof(x)}(x)
 end
 
+mutable struct Shape{T}
+  size::NTuple{N,Int} where N
+end
+
 struct Node{T}
   value::Variable
 end
 
-const AType{T} = Union{Type{T},Const{T},Partial{T},Node{T}}
+for T in :[Partial, Const, Shape, Node].args
+  @eval hash(x::$T, h::UInt64) = hash($T, hash(getfield(x, 1), h))
+  @eval x::$T == y::$T = getfield(x, 1) == getfield(y, 1)
+end
+
+const AType{T} = Union{Type{T},Const{T},Shape{T},Partial{T},Node{T}}
 
 Base.show(io::IO, c::Const) = print(io, "const(", c.value, ")")
 
 widen(::AType{T}) where T = T
+Base.eltype(x::Shape) = eltype(widen(x))
+Base.size(x::Shape) = x.size
 
+Base.size(x::Const{<:Array}) = size(x.value)
+Base.eltype(x::Const{<:Array}) = eltype(x.value)
+Base.size(::AType{<:Number}) = ()
+Base.eltype(T::AType{<:Number}) = widen(T)
+
+ptuple() = Const(())
 ptuple(x::Const...) = Const(map(x -> x.value, x))
+ptuple(x::Type...) = Tuple{x...}
 ptuple(x...) = Partial{Tuple{widen.(x)...}}((x...,))
 
 _union(::Type{Union{}}, T) = T

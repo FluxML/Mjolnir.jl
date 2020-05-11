@@ -2,9 +2,15 @@ struct Trace
   ir::IR
   stack::Vector{Any}
   primitives
+  nodes::IdDict{Union{Partial,Shape},Variable}
 end
 
-Trace(P) = Trace(IR(), [], P)
+Trace(P) = Trace(IR(), [], P, IdDict())
+
+function node!(tr::Trace, T::Union{Partial,Shape}, v)
+  tr.nodes[T] = v
+  return
+end
 
 struct TraceError
   error
@@ -25,7 +31,7 @@ rename(env, ex) = IRTools.prewalk(
 
 returntype(ir) = exprtype(ir, returnvalue(IRTools.blocks(ir)[end]))
 
-function unapply!(P, tr, Ts, args)
+function unapply!(tr, Ts, args)
   if VERSION > v"1.4-" && Ts[1] isa AType{typeof(Core._apply_iterate)}
     Ts = [Const(Core._apply), Ts[3:end]...]
     args = [Core._apply, args[3:end]...]
@@ -34,14 +40,16 @@ function unapply!(P, tr, Ts, args)
   Ts′ = Any[Ts[2]]
   args′ = Any[args[2]]
   for (x, T) in zip(args[3:end], Ts[3:end])
-    len = partial(P, Const(length), T).value
+    len = partial(tr.primitives, Const(length), T).value
     for i = 1:len
-      t = partial(P, Const(getindex), T, Const(i))
+      t = partial(tr.primitives, Const(getindex), T, Const(i))
       push!(Ts′, t)
-      push!(args′, push!(tr, stmt(xcall(getindex, x, i), type = t)))
+      ex = haskey(tr.nodes, t) ? tr.nodes[t] :
+            push!(tr.ir, stmt(xcall(getindex, x, i), type = t))
+      push!(args′, ex)
     end
   end
-  return Ts′, args′
+  return unapply!(tr, Ts′, args′)
 end
 
 function copyblock!(ir::IR, b)
@@ -148,14 +156,17 @@ function traceblock!(tr::Trace, env, bl)
     ex = v.expr
     if isexpr(ex, :call)
       Ts = map(v -> nodetype(tr.ir, rename(env, v)), ex.args)
-      Ts, args = unapply!(tr.primitives, tr.ir, Ts, rename(env, ex).args)
+      Ts, args = unapply!(tr, Ts, rename(env, ex).args)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
       args, Ts = replacement(tr.primitives, args, Ts)
       if (T = partial(tr.primitives, Ts...)) != nothing
-        if T isa Node
+        if T isa Node && !effectful(Ts...)
           env[k] = T.value
+        elseif haskey(tr.nodes, T) && !effectful(Ts...)
+          env[k] = tr.nodes[T]
         else
           env[k] = push!(tr.ir, stmt(Expr(:call, args...), type = T))
+          T isa Union{Partial,Shape} && (tr.nodes[T] = env[k])
         end
       else
         env[k] = tracecall!(tr, args, Ts...)
@@ -204,11 +215,29 @@ function tracecall!(tr::Trace, args, Ts...)
   return result
 end
 
+"""
+    trace(P, Ts...)
+
+Trace the method signature `Ts` using the primtive set `P`. e.g.
+
+    julia> trace(Defaults(), typeof(+), Int, Int)
+    1: (%1 :: typeof(+), %2 :: Int64, %3 :: Int64)
+      %4 = (%1)(%2, %3) :: Int64
+      return %4
+
+    julia> trace(Defaults(), typeof(+), Const(2), Const(2))
+    1: (%1 :: typeof(+), %2 :: const(2), %3 :: const(2))
+      return 4
+"""
 function trace(P, Ts...)
   tr = Trace(P)
   try
     argnames = [argument!(tr.ir, T) for T in Ts]
+    for (T, x) in zip(Ts, argnames)
+      T isa Union{Partial,Shape} && node!(tr, T, x)
+    end
     args = [T isa Const ? T.value : arg for (T, arg) in zip(Ts, argnames)]
+    args, Ts = replacement(P, args, Ts)
     if (T = partial(tr.primitives, Ts...)) != nothing
       return!(tr.ir, push!(tr.ir, stmt(Expr(:call, args...), type = T)))
     else
@@ -228,6 +257,27 @@ function tracem(P, ex)
   :(trace($(esc(P)), atype.(($(esc(f)), $(esc.(args)...)))...))
 end
 
+"""
+    @trace f(args...)
+    @trace P f(args...)
+
+Get a typed trace for `f`, analagous to `@code_typed`. Note that unlike
+`@code_typed`, you probably want to pass types rather than values, e.g.
+
+    julia> @trace Int+Int
+    1: (%1 :: const(+), %2 :: Int64, %3 :: Int64)
+      %4 = (+)(%2, %3) :: Int64
+      return %4
+
+If you instead pass actual integers, Mjolnir will aggressively
+constant-propagate them, resulting in a trivial trace.
+
+    julia> @trace 2+2
+    1: (%1 :: const(+), %2 :: const(2), %3 :: const(2))
+      return 4
+
+`P` is the primitive set used, which is `Mjolnir.Defaults()` by default.
+"""
 macro trace(P, ex)
   tracem(P, ex)
 end

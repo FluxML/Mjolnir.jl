@@ -29,6 +29,8 @@ struct Basic end
 @abstract Basic ifelse(c::Const{Bool}, a, b) =
   c.value ? a : b
 
+@abstract Basic ifelse(c::Bool, a, b) = Union{widen(a),widen(b)}
+
 @abstract Basic !(::Bool) = Bool
 @abstract Basic !(x::Const{Bool}) = Const(!x.value)
 

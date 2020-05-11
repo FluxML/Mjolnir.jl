@@ -25,7 +25,7 @@ named(arg) = isexpr(arg, :(::)) && length(arg.args) == 1 ? :($(gensym())::$(arg.
 typeless(x) = MacroTools.postwalk(x -> isexpr(x, :(::), :kw) ? x.args[1] : x, x)
 isvararg(x) = isexpr(x, :(::)) && namify(x.args[2]) == :Vararg
 
-wraptype(x) = namify(x) in (:Partial, :Const, :AType) ? x : :(Mjolnir.AType{<:$x})
+wraptype(x) = namify(x) in (:Partial, :Const, :AType, :Shape) ? x : :(Mjolnir.AType{<:$x})
 wraptypes(x) = MacroTools.postwalk(x -> isexpr(x, :(::)) ? Expr(:(::), x.args[1], wraptype(x.args[2])) : x, x)
 
 const_kw(x) = MacroTools.postwalk(x -> isexpr(x, :kw) ? Expr(:kw, x.args[1], :($Const($(x.args[2])))) : x, x)
@@ -52,10 +52,10 @@ function abstractm(ex, P, abstract)
   func = @q f($(fargs...)) where $(Ts...) = $(esc(body))
   quote
     $func
-    function Mjolnir.$abstract(::$(esc(P)), $f::AType{<:$T}, $(args...)) where $(Ts...)
+    function Mjolnir.$abstract(::$(esc(P)), $f::AType{$T}, $(args...)) where $(Ts...)
       f($f, $(argnames...))
     end
-    function Mjolnir.$abstract(::$(esc(P)), ::AType{<:Core.kwftype($T)}, kw, $f::AType{<:$T}, $(args...)) where $(Ts...)
+    function Mjolnir.$abstract(::$(esc(P)), ::AType{Core.kwftype($T)}, kw, $f::AType{<:$T}, $(args...)) where $(Ts...)
       f($f, $(argnames...); unwrap_kw(kw)...)
     end
     nothing
