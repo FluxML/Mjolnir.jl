@@ -8,7 +8,7 @@ struct Numeric end
               cospi, cot, cotd, coth, csc, cscd, csch, deg2rad, exp, exp10, exp2,
               expm1, float, inv, log, log10, log1p, log2, rad2deg, sec, secd, sech,
               sin, sind, sinh, sinpi, sqrt, tan, tand, tanh, transpose,trailing_zeros,
-              >>, <<, abs, unsigned, rem
+              >>, <<, unsigned, rem
 
 @abstract Numeric rand() = Float64
 @abstract Numeric randn() = Float64
