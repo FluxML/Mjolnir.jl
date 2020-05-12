@@ -32,7 +32,9 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @abstract Basic function Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...)
   A = Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
-  if args isa Tuple{Vararg{Union{Const,Shape,AType{<:Number}}}} && !(args isa Tuple{Vararg{AType{<:Number}}})
+  if f isa Const && args isa Tuple{Vararg{Const}}
+    return Const(broadcast(f.value, map(x -> x.value, args)...))
+  elseif args isa Tuple{Vararg{Union{Const,Shape,AType{<:Number}}}} && !(args isa Tuple{Vararg{AType{<:Number}}})
     return Shape{A}(Broadcast.broadcast_shape(size.(args)...))
   else
     return A
