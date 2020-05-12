@@ -114,6 +114,12 @@ function mutate(::Basic, cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{
   get(x.value, name.value, Union{})
 end
 
+@abstract Basic (==)(a::Const, b::Const) = Const(a.value == b.value)
+@abstract Basic (==)(a, b) = Bool
+
+@abstract Basic (!=)(a::Const, b::Const) = Const(a.value != b.value)
+@abstract Basic (!=)(a, b) = Bool
+
 @abstract Basic (===)(a::Const{T}, b::Const{T}) where T =
   Const(a.value === b.value)
 
