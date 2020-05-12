@@ -60,6 +60,7 @@ end
 
 @partial Basic function getfield(x::Partial{T}, name::Const{Symbol}) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
+  i == nothing && error("Type $(widen(x).name) has no field $(name.value)")
   x.value[i]
 end
 
