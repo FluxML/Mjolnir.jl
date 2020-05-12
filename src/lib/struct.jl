@@ -39,11 +39,11 @@ abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
 @abstract Basic tuple(xs...) = ptuple(xs...)
 
-@abstract Basic getindex(x::Const{<:Union{Tuple,NamedTuple}}, i::Const{<:Integer}) =
-  Const(x.value[i.value])
+@abstract Basic getindex(x::Const{<:Tuple}, i::Const{<:Integer}) = Const(x.value[i.value])
+@abstract Basic getindex(x::Const{<:NamedTuple}, i::Const{<:Integer}) = Const(x.value[i.value])
 
-@abstract Basic getindex(x::Partial{<:Union{Tuple,NamedTuple}}, i::Const{<:Integer}) =
-  x.value[i.value]
+@abstract Basic getindex(x::Partial{<:Tuple}, i::Const{<:Integer}) = x.value[i.value]
+@abstract Basic getindex(x::Partial{<:NamedTuple}, i::Const{<:Integer}) = x.value[i.value]
 
 @abstract Basic getindex(xs::Tuple, i::Const{<:Integer}) = widen(xs).parameters[i.value]
 
