@@ -3,9 +3,15 @@ struct Trace
   stack::Vector{Any}
   primitives
   nodes::IdDict{Union{Partial,Shape},Variable}
+  ircache::Dict{Any,Any}
 end
 
-Trace(P) = Trace(IR(), [], P, IdDict())
+Trace(P) = Trace(IR(), [], P, IdDict(), Dict())
+
+function getir(tr::Trace, Ts...)
+  Ts = widen.(Ts)
+  Base.@get!(tr.ircache, Ts, IR(Ts..., prune = false))
+end
 
 function node!(tr::Trace, T::Union{Partial,Shape}, v)
   tr.nodes[T] = v
