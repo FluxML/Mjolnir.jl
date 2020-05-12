@@ -1,5 +1,7 @@
 module Mjolnir
 
+@nospecialize
+
 using IRTools, MacroTools
 using IRTools.All
 using IRTools: block
