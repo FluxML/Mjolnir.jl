@@ -43,6 +43,7 @@ function unapply!(tr, Ts, args)
     len = partial(tr.primitives, Const(length), T).value
     for i = 1:len
       t = partial(tr.primitives, Const(getindex), T, Const(i))
+      @assert t != nothing
       push!(Ts′, t)
       ex = haskey(tr.nodes, t) ? tr.nodes[t] :
             push!(tr.ir, stmt(xcall(getindex, x, i), type = t))
