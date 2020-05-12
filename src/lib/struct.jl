@@ -47,7 +47,9 @@ abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
 @abstract Basic getindex(xs::Tuple, i::Const{<:Integer}) = widen(xs).parameters[i.value]
 
-@abstract Basic length(xs::Partial{<:Tuple}) = Const(length(xs.value))
+@abstract Basic getindex(xs::Const{<:Integer}, i::Const{<:Integer}) = i.value == 1 ? xs : nothing
+
+@abstract Basic length(xs::NTuple{N,Any}) where N = Const(N)
 
 @partial Basic function setfield!(x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
