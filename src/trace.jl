@@ -10,7 +10,11 @@ Trace(P) = Trace(IR(), [], P, IdDict(), Dict())
 
 function getir(tr::Trace, Ts...)
   Ts = widen.(Ts)
-  Base.@get!(tr.ircache, Ts, IR(Ts..., prune = false))
+  m = IRTools.meta(Tuple{Ts...})
+  m == nothing && return
+  key = Base.isgenerated(m.method) ? Ts : (m.method, m.sparams)
+  ir = Base.@get!(tr.ircache, key, IR(m, prune = false))
+  return deepcopy(ir)
 end
 
 function node!(tr::Trace, T::Union{Partial,Shape}, v)
@@ -214,7 +218,7 @@ end
 
 function tracecall!(tr::Trace, args, Ts...)
   push!(tr.stack, Ts)
-  ir = IR(widen.(Ts)...)
+  ir = getir(tr, Ts...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
   ir = ir |> merge_returns! |> prepare_ir!
   result = trace!(tr, ir, args)
