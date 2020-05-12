@@ -47,7 +47,9 @@ abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
 
 @abstract Basic getindex(xs::Tuple, i::Const{<:Integer}) = widen(xs).parameters[i.value]
 
-@abstract Basic length(xs::Partial{<:Tuple}) = Const(length(xs.value))
+@abstract Basic getindex(xs::Const{<:Integer}, i::Const{<:Integer}) = i.value == 1 ? xs : nothing
+
+@abstract Basic length(xs::NTuple{N,Any}) where N = Const(N)
 
 @partial Basic function setfield!(x::Partial{T}, name::Const{Symbol}, s) where T
   i = findfirst(f -> f == name.value, fieldnames(T))
@@ -113,6 +115,12 @@ function mutate(::Basic, cx::MutCtx, ::AType{typeof(getindex)}, x::Partial{Dict{
   edge!(cx, x)
   get(x.value, name.value, Union{})
 end
+
+@abstract Basic (==)(a::Const, b::Const) = Const(a.value == b.value)
+@abstract Basic (==)(a, b) = Bool
+
+@abstract Basic (!=)(a::Const, b::Const) = Const(a.value != b.value)
+@abstract Basic (!=)(a, b) = Bool
 
 @abstract Basic (===)(a::Const{T}, b::Const{T}) where T =
   Const(a.value === b.value)
