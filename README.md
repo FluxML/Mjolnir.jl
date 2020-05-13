@@ -5,8 +5,8 @@
 Mjolnir is a hybrid approach to partial evaluation / abstract interpretation,
 with an implementation in Julia. It can be thought of as a blend of
 operator-overloading based tracing (as in JAX, PyTorch Script, staged
-programming systems etc.) and dataflow-based abstract interpretation, as in the
-type inference systems of Julia, TypeScript and Crystal. It is aimed at package
+programming systems etc.) and dataflow-based abstract interpretation (as in the
+type inference systems of Julia, TypeScript and Crystal). It is aimed at package
 developers rather than Julia end-users.
 
 Mjolnir can reproduce the compact, linear traces (aka computation graphs or
@@ -80,4 +80,4 @@ julia> @trace pow(2, 3)
 
 Mjolnir is designed to be [highly
 customisable](https://github.com/MikeInnes/Mjolnir.jl/blob/master/docs/types.md),
-and to give as much control as possible to packages that depend on it.
+and to give as much control as possible to packages that build on it.
