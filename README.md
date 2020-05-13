@@ -36,8 +36,11 @@ julia> @trace pow(Int, 3)
 However, it avoids several of the downsides of those systems. It supports
 arbitrary Julia types (not just 'tensors' but also strings and structs). It
 supports value-dependent control flow as it can encode branches in the trace.
-Side effects do not need to be evaluated at compile time. Mjolnir can thus
-compile a much wider range of Julia programs than OO approaches.
+Side effects do not need to be evaluated at compile time. It can enforce its
+assumptions (i.e. referential transparency) rather than making the user
+responsible for them, and can generate diagnostics when there are issues.
+Mjolnir can thus compile a much wider range of Julia programs than OO
+approaches.
 
 ```julia
 julia> function pow(x, n)
