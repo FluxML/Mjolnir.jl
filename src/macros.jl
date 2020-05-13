@@ -5,10 +5,10 @@ using MacroTools: @q
 
 function purem(P, f)
   quote
-    Mjolnir.abstract(::$(esc(P)), ::AType{typeof($(esc(f)))}, args::Const...) =
+    Mjolnir.abstract(::$(esc(P)), ::AType{Core.Typeof($(esc(f)))}, args::Const...) =
       Const($(esc(f))(map(arg -> arg.value, args)...))
-    Mjolnir.abstract(::$(esc(P)), ::AType{typeof($(esc(f)))}, args...) =
-      Core.Compiler.return_type($(esc(f)), Tuple{widen.(args)...})
+    Mjolnir.abstract(::$(esc(P)), ::AType{Core.Typeof($(esc(f)))}, args...) =
+      slow_return_type($(esc(f)), Tuple{widen.(args)...})
   end
 end
 
