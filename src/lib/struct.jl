@@ -131,3 +131,5 @@ end
 @abstract Basic (===)(a, b) = Const(false)
 
 @abstract Basic isempty(x::Const) = Const(isempty(x.value))
+
+@pure Basic pairs

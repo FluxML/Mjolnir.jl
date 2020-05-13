@@ -181,6 +181,8 @@ function traceblock!(tr::Trace, env, bl)
           env[k] = push!(tr.ir, stmt(Expr(:call, args...), type = T))
           T isa Union{Partial,Shape} && (tr.nodes[T] = env[k])
         end
+      elseif length(Ts) == 2 && Ts[1] isa Const{<:Type{<:NamedTuple}} && Ts[2] isa Const
+        env[k] = Ts[1].value(Ts[2].value)
       else
         env[k] = tracecall!(tr, args, Ts...)
       end

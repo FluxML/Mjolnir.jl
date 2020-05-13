@@ -29,7 +29,9 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @partial Basic pop!(xs::Partial{Vector{T}}) where T = pop!(xs.value)
 
-@pure Basic Colon(), similar
+@pure Basic Colon(), similar, Broadcast.BroadcastStyle, Broadcast.result_style
+
+@abstract Basic map(xs::Const...) = Const(map([x.value for x in xs]...))
 
 @abstract Basic function Broadcast.broadcasted(::Broadcast.AbstractArrayStyle, f, args...)
   A = Core.Compiler.return_type(broadcast, Tuple{widen(f),widen.(args)...})
