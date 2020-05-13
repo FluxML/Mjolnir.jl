@@ -1,12 +1,13 @@
-struct Trace
+mutable struct Trace
   ir::IR
   stack::Vector{Any}
   primitives
   nodes::IdDict{Union{Partial,Shape},Variable}
   ircache::Dict{Any,Any}
+  total::Int
 end
 
-Trace(P) = Trace(IR(), [], P, IdDict(), Dict())
+Trace(P) = Trace(IR(), [], P, IdDict(), Dict(), 0)
 
 function getir(tr::Trace, Ts...)
   Ts = widen.(Ts)
@@ -171,6 +172,7 @@ function traceblock!(tr::Trace, env, bl)
       Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
       args, Ts = replacement(tr.primitives, args, Ts)
       if (T = partial(tr.primitives, Ts...)) != nothing
+        tr.total += 1
         if T isa Node && !effectful(Ts...)
           env[k] = T.value
         elseif haskey(tr.nodes, T) && !effectful(Ts...)
@@ -217,6 +219,7 @@ function trace!(tr::Trace, ir, args)
 end
 
 function tracecall!(tr::Trace, args, Ts...)
+  tr.total += 1
   push!(tr.stack, Ts)
   ir = getir(tr, Ts...)
   ir == nothing && error("No IR for $(Tuple{widen.(Ts)...})")
@@ -250,10 +253,12 @@ function trace(P, Ts...)
     args = [T isa Const ? T.value : arg for (T, arg) in zip(Ts, argnames)]
     args, Ts = replacement(P, args, Ts)
     if (T = partial(tr.primitives, Ts...)) != nothing
+      tr.total += 1
       return!(tr.ir, push!(tr.ir, stmt(Expr(:call, args...), type = T)))
     else
       return!(tr.ir, tracecall!(tr, args, Ts...))
     end
+    # @info "$(tr.total) functions traced."
     return cleanup!(tr.ir)
   catch e
     throw(TraceError(e, tr.stack))
