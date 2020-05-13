@@ -8,7 +8,7 @@ function purem(P, f)
     Mjolnir.abstract(::$(esc(P)), ::AType{Core.Typeof($(esc(f)))}, args::Const...) =
       Const($(esc(f))(map(arg -> arg.value, args)...))
     Mjolnir.abstract(::$(esc(P)), ::AType{Core.Typeof($(esc(f)))}, args...) =
-      slow_return_type($(esc(f)), Tuple{widen.(args)...})
+      Core.Compiler.return_type($(esc(f)), Tuple{widen.(args)...})
   end
 end
 
