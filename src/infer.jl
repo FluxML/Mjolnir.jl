@@ -36,6 +36,7 @@ Base.eltype(x::Const{<:Array}) = eltype(x.value)
 Base.ndims(x::Const{<:Array}) = ndims(x.value)
 Base.size(::AType{<:Number}) = ()
 Base.eltype(T::AType{<:Number}) = widen(T)
+Base.ndims(T::AType{<:Number}) = 0
 
 ptuple() = Const(())
 ptuple(x::Const...) = Const(map(x -> x.value, x))
