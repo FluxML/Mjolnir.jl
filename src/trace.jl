@@ -14,7 +14,7 @@ function getir(tr::Trace, Ts...)
   m = IRTools.meta(Tuple{Ts...})
   m == nothing && return
   key = Base.isgenerated(m.method) ? Ts : (m.method, m.sparams)
-  ir = Base.@get!(tr.ircache, key, IR(m, prune = false))
+  ir = get!(() -> IR(m, prune = false), tr.ircache, key)
   return deepcopy(ir)
 end
 

@@ -9,9 +9,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
-git-tree-sha1 = "8845400bd2d9815d37720251f1b53d27a335e1f4"
+git-tree-sha1 = "90ee39f9beaaa186e4968417ea2b8ed5673c91c0"
 uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
-version = "0.3.2"
+version = "0.3.3"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]

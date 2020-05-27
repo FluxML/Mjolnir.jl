@@ -44,7 +44,7 @@ end
 
 function partials!(ir::IR)
   slots = IdDict()
-  slot(k, T) = Base.@get!(slots, k, Slot(gensym(:partial), T))
+  slot(k, T) = get!(() -> Slot(gensym(:partial), T), slots, k)
   for (v, st) in ir
     ex = st.expr
     if iscall(ex, setindex!)
