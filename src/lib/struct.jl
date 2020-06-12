@@ -36,6 +36,7 @@ end
 end
 
 abstract(::Basic, ::AType{typeof(tuple)}, xs::Type...) = Tuple{xs...}
+@abstract Basic eltype(xs::Type{T}) where T<:Tuple = Const(eltype(T))
 
 @abstract Basic tuple(xs...) = ptuple(xs...)
 
