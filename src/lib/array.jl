@@ -29,6 +29,8 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 
 @partial Basic pop!(xs::Partial{Vector{T}}) where T = pop!(xs.value)
 
+@abstract Basic collect(xs::Const{<:Tuple}) = Const(collect(xs.value))
+
 @pure Basic Colon(), similar, Broadcast.BroadcastStyle, Broadcast.result_style
 
 @abstract Basic map(xs::Const...) = Const(map([x.value for x in xs]...))
