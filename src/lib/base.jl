@@ -9,6 +9,8 @@ struct Basic end
 @abstract Basic Core.apply_type(Ts::Const...) =
   Const(Core.apply_type(map(T -> T.value, Ts)...))
 
+@abstract Basic (<:)(S::Type, T::Type) = Const(widen(S) <: widen(T))
+
 @abstract Basic typeof(x::Const) = Const(widen(x))
 @abstract Basic typeof(x::T) where T =
   isconcretetype(T) ? Const(T) : Type
