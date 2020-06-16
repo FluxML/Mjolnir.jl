@@ -6,7 +6,7 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @abstract Basic getindex(xs::Const{<:Array}, i::Const...) =
   Const(xs.value[map(i -> i.value, i)...])
 
-@abstract Basic length(xs::Const) = Const(length(xs.value))
+@abstract Basic length(xs::Const{<:Array}) = Const(length(xs.value))
 @abstract Basic length(xs::Partial{<:Array}) = Const(length(xs.value))
 @abstract Basic length(xs::Shape{<:Array}) = Const(prod(size(xs)))
 @abstract Basic length(xs::Array) = Int
