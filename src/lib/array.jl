@@ -48,6 +48,7 @@ end
 
 @abstract Basic function mapreduce(f, op, A; dims = :)
   T = Core.Compiler.return_type(mapreduce, Tuple{widen(f),widen(op),widen(A)})
-  (dims == Const(:) || dims == (:) || !(A isa Shape)) && return T
+  (dims == Const(:) || dims == (:)) && return T
+  A isa Type && return A
   return Shape{Array{eltype(T),ndims(A)}}(ntuple(i -> i in dims ? 1 : size(A)[i], ndims(A)))
 end
