@@ -267,12 +267,17 @@ function trace(P, Ts...)
   end
 end
 
+to_type_level(x) = :(Mjolnir.Const($x))
+to_type_level(ex::Expr) = isexpr(ex, :(::)) && length(ex.args) == 1 ? (ex.args[1]) : :(Mjolnir.Const($ex)) 
+
 atype(T::AType) = T
 atype(x) = Const(x)
+#atype.(($(esc(f)), $(esc.(args)...)))...)
 
 function tracem(P, ex)
   @capture(ex, f_(args__)) || error("@trace f(args...)")
-  :(trace($(esc(P)), atype.(($(esc(f)), $(esc.(args)...)))...))
+  sig = ((esc ∘ to_type_level).((f, args...)))  
+  :(trace($(esc(P)), $(sig...)))
 end
 
 """
