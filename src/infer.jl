@@ -86,6 +86,7 @@ mutable struct Frame
   edges::Vector{Any}
   stmts::Vector{Vector{Variable}}
   rettype::AType
+  outer::Bool
 end
 
 getblock(fr::Frame, b, follow) =
@@ -95,7 +96,7 @@ getblock(fr::Frame, b, follow) =
 # TODO clear up inlined edges
 uninline!(fr::Frame, b, follow) = deleteat!(fr.inlined[b], follow+1:length(fr.inlined[b]))
 
-Frame(ir::IR) = Frame(ir, [IR[] for _ = 1:length(blocks(ir))], [], keys.(blocks(ir)), Union{})
+Frame(ir::IR; outer = false) = Frame(ir, [IR[] for _ = 1:length(blocks(ir))], [], keys.(blocks(ir)), Union{}, outer)
 
 function frame(ir::IR, args...)
   prepare_ir!(ir)
@@ -200,7 +201,7 @@ function step!(inf::Inference)
       error("Unrecognised expression $(st.expr)")
     end
   elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
-          && !(brs[1].block == length(frame.ir.blocks)))
+          && !(frame.outer && brs[1].block == length(frame.ir.blocks)))
     inferbranch!(inf, frame, b, f, brs[1])
   else
     for br in brs
@@ -248,4 +249,20 @@ function return_type(ir::IR, args...)
   inf = Inference(fr, Defaults())
   infer!(inf)
   return fr.rettype
+end
+
+function inlineable(ir::IR, inf::Inference)
+  for (v, st) in ir
+    Ts = exprtype.((ir,), st.expr.args)
+    haskey(inf.frames, Ts) && return (v, Ts)
+  end
+end
+
+function inlineall(ir::IR, inf::Inference)
+  while (next = inlineable(ir, inf)) != nothing
+    v, Ts = next
+    subir = inf.frames[Ts].ir
+    ir = inline(ir, v, subir)
+  end
+  return ir
 end
