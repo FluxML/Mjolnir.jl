@@ -145,7 +145,9 @@ function openbranches(out, env, bl)
   brs = []
   for br in branches(bl)
     br.condition == nothing && (push!(brs, br); break)
-    cond = exprtype(out, env[br.condition])
+    cond = br.condition
+    cond isa Variable && (cond = env[cond])
+    cond = exprtype(out, cond)
     cond == Const(true) && continue
     cond == Const(false) && (push!(brs, br); break)
     push!(brs, br)
