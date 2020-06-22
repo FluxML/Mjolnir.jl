@@ -237,9 +237,9 @@ function Inference(fr::Frame, P)
   Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict(), P)
 end
 
-function infer!(ir::IR, args...)
+function infer!(P, ir::IR, args...)
   fr = frame(ir, args...)
-  inf = Inference(fr)
+  inf = Inference(fr, P)
   infer!(inf)
 end
 
