@@ -69,7 +69,7 @@ end
   x.value[i.value]
 end
 
-@partial Basic function getfield(x::Const{T}, i::Const{<:Integer}) where T
+@abstract Basic function getfield(x::Const{T}, i::Const{<:Integer}) where T
   Const(x.value[i.value])
 end
 

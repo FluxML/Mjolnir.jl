@@ -23,6 +23,10 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @partial Basic getindex(xs::Partial{<:Array}, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
+# TODO needs edges if we implement `setindex!`
+@abstract Basic getindex(xs::Partial{<:AbstractArray{T}}, i::Const{<:Integer}...) where T =
+  xs.value[map(i -> i.value, i)...]
+
 @abstract Basic getindex(xs::AbstractArray{T}, is::Integer...) where T = T
 
 @abstract Basic setindex!(xs::AbstractArray, is...) = xs
