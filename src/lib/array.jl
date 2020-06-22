@@ -23,7 +23,11 @@ arrayshape(T::Type, sz...) = arrayshape(Array{T,length(sz)}, sz...)
 @partial Basic getindex(xs::Partial{<:Array}, i::Const...) =
   xs.value[map(i -> i.value, i)...]
 
-@abstract Basic Vector{Any}() = Partial{Vector{Any}}([])
+@abstract Basic getindex(xs::AbstractArray{T}, is::Integer...) where T = T
+
+@abstract Basic setindex!(xs::AbstractArray, is...) = xs
+
+@abstract Basic Vector{T}() where T = Partial{Vector{T}}([])
 
 @partial Basic push!(xs::Partial{Vector{T}}, x::T) where T = (push!(xs.value, x); xs)
 
