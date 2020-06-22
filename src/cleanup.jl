@@ -8,7 +8,8 @@ function inline_consts!(ir::IR)
   isused(x) = get(us, x, 0) > 0
   for v in reverse(keys(ir))
     st = ir[v]
-    if st.type isa Union{Const,Node}
+    effect = effectful(exprtype.((ir,), ir[v].expr.args)...)
+    if st.type isa Union{Const,Node} && !effect
       map(v -> v isa Variable && (us[v] -= 1), st.expr.args)
       if st.type isa Node || istrivial(st.type.value) || !isused(v)
         delete!(ir, v)
@@ -16,6 +17,8 @@ function inline_consts!(ir::IR)
       else
         ir[v] = st.type.value
       end
+    elseif effect && st.type isa Node
+      ir[v] = stmt(st, type = widen(st.type))
     end
   end
   return IRTools.prewalk!(x -> get(env, x, x), ir)
