@@ -147,6 +147,7 @@ exprtype(ir, x::GlobalRef) = Const(getproperty(x.mod, x.name))
 
 function infercall!(inf, loc, block, ex)
   Ts = exprtype.((block.ir,), ex.args)
+  Ts[1] === Const(Base.not_int) && (Ts[1] = Const(!))
   T = mutate(inf.primitives, MutCtx(inf, loc), Ts...)
   T == nothing || return T
   ir = IR(widen.(Ts)...)
@@ -193,6 +194,10 @@ function step!(inf::Inference)
         block.ir[var] = stmt(block[var], type = _union(st.type, T))
         push!(inf.queue, (frame, b, f, ip+1))
       end
+    elseif isexpr(st.expr, :inbounds)
+      push!(inf.queue, (frame, b, f, ip+1))
+    else
+      error("Unrecognised expression $(st.expr)")
     end
   elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
           && !(brs[1].block == length(frame.ir.blocks)))
