@@ -42,6 +42,10 @@ effectful(::AType{typeof(setindex!)}, args...) = true
 
 @pure Basic repr, isdefined
 
+@abstract Basic Core.sizeof(s::Const{String}) = Const(Core.sizeof(s.value))
+@abstract Basic length(s::Const{String}) = Const(length(s.value))
+@abstract Basic getindex(s::Const{String}, i::Const{<:Integer}) = Const(getindex(s.value, i.value))
+
 # Tweaked kwarg func handling
 
 struct KwFunc{F} end
