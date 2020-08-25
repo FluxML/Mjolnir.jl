@@ -47,7 +47,7 @@ functions are called _primitives_.
 julia> f(x) = 3x^2 + 2x + 1
 f (generic function with 1 method)
 
-julia> @trace f(Int)
+julia> @trace f(::Int)
 1: (%1 :: const(f), %2 :: Int64)
   %3 = (*)(%2, %2) :: Int64
   %4 = (*)(3, %3) :: Int64
@@ -144,7 +144,7 @@ julia> @abstract MyPrimitives (a::AType{T} * b::AType{T}) where T<:Union{Float64
 
 julia> MyDefaults() = Multi(MyPrimitives(), Mjolnir.Basic())
 
-julia> @trace MyDefaults() Int * Float64
+julia> @trace MyDefaults() ::Int * ::Float64
 1: (%1 :: const(*), %2 :: Int64, %3 :: Float64)
   %4 = ($(QuoteNode(Float64)))(%2) :: Float64
   %5 = (*)(%4, %3) :: Float64

@@ -273,12 +273,17 @@ function trace(P, Ts...)
   end
 end
 
+to_type_level(x) = :(Mjolnir.Const($x))
+to_type_level(ex::Expr) = isexpr(ex, :(::)) && length(ex.args) == 1 ? (ex.args[1]) : :(Mjolnir.Const($ex)) 
+
 atype(T::AType) = T
 atype(x) = Const(x)
+#atype.(($(esc(f)), $(esc.(args)...)))...)
 
 function tracem(P, ex)
   @capture(ex, f_(args__)) || error("@trace f(args...)")
-  :(trace($(esc(P)), atype.(($(esc(f)), $(esc.(args)...)))...))
+  sig = ((esc ∘ to_type_level).((f, args...)))  
+  :(trace($(esc(P)), $(sig...)))
 end
 
 """
@@ -288,7 +293,7 @@ end
 Get a typed trace for `f`, analagous to `@code_typed`. Note that unlike
 `@code_typed`, you probably want to pass types rather than values, e.g.
 
-    julia> @trace Int+Int
+    julia> @trace ::Int + ::Int
     1: (%1 :: const(+), %2 :: Int64, %3 :: Int64)
       %4 = (+)(%2, %3) :: Int64
       return %4
