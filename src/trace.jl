@@ -287,7 +287,7 @@ end
 Get a typed trace for `f`, analagous to `@code_typed`. Note that unlike
 `@code_typed`, you probably want to pass types rather than values, e.g.
 
-    julia> @trace Int+Int
+    julia> @trace ::Int + ::Int
     1: (%1 :: const(+), %2 :: Int64, %3 :: Int64)
       %4 = (+)(%2, %3) :: Int64
       return %4
