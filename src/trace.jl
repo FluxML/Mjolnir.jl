@@ -133,11 +133,7 @@ function abstract!(tr, bl, env)
   for i = 1:length(args)
     argtypes(ir)[i] = exprtype(tr.ir, rename(env, args[i]))
   end
-  inf = Inference(Frame(ir, outer = true), tr.primitives)
-  infer!(inf)
-  # TODO weird that we need to expand here; perhaps inlining is impicitly pruning
-  # somehow.
-  ir = inlineall(ir, inf) |> expand!
+  infer!(Inference(Frame(ir), tr.primitives))
   inline!(tr.ir, ir, rename.((env,), args))
   for (k, v) in zip(arguments(block(bl.ir, after)), arguments(blocks(tr.ir)[end]))
     env[k] = v

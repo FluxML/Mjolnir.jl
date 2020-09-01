@@ -164,3 +164,15 @@ tr = @trace f(::Matrix{Int32})
 f(xs) = sum(xs, dims = 1)
 tr = @trace f(::Matrix{Int32})
 @test returntype(tr) == Matrix{Int32}
+
+
+function negsquare(x)
+    if x > 0
+        return x^2
+    else
+        return -x^2
+    end
+end
+
+tr = @trace negsquare(::Float64)
+@test returntype(tr) == Float64
