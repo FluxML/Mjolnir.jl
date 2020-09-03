@@ -8,6 +8,7 @@ IRTools = "7869d1d1-7146-5819-86e3-90919afe41df"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 
 [compat]
+IRTools = "0.4"
 MacroTools = "0.5"
 julia = "1"
 
