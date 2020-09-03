@@ -1,7 +1,7 @@
 name = "Mjolnir"
 uuid = "1154507a-7ac2-44fe-9f15-34617bca9db5"
 authors = ["Mike J Innes <mike.j.innes@gmail.com>"]
-version = "0.1.0"
+version = "0.2.1"
 
 [deps]
 IRTools = "7869d1d1-7146-5819-86e3-90919afe41df"
