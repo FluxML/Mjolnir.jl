@@ -1,7 +1,7 @@
 # Mjolnir
 
+[![Build Status](https://travis-ci.org/FluxML/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/FluxML/Mjolnir.jl)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
-[![Build Status](https://travis-ci.org/MikeInnes/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Mjolnir.jl)
 
 Mjolnir is a hybrid approach to partial evaluation / abstract interpretation,
 with an implementation in Julia. It can be thought of as a blend of
@@ -26,7 +26,7 @@ pow (generic function with 1 method)
 
 julia> using Mjolnir
 
-julia> @trace pow(Int, 3)
+julia> @trace pow(::Int, 3)
 1: (%1 :: const(pow), %2 :: Int64, %3 :: const(3))
   %4 = (*)(1, %2) :: Int64
   %5 = (*)(%4, %2) :: Int64
@@ -44,7 +44,7 @@ can generate diagnostics when there are issues. Mjolnir can thus compile a much
 wider range of Julia programs than OO approaches.
 
 ```julia
-julia> @trace pow(Int, Int)
+julia> @trace pow(::Int, ::Int)
 1: (%1 :: const(pow), %2 :: Int64, %3 :: Int64)
   %4 = (>)(%3, 0) :: Bool
   br 3 (1) unless %4

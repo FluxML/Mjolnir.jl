@@ -64,7 +64,7 @@ ir = @code_ir fact(1)
 tr = @trace f()
 @test returntype(tr) == String
 
-tr = @trace pow(Int, 3)
+tr = @trace pow(::Int, 3)
 @test length(tr.blocks) == 1
 @test returntype(tr) == Int
 
@@ -72,16 +72,16 @@ tr = @trace pow(2, 3)
 @test length(tr.blocks) == 1
 @test returntype(tr) == Const(8)
 
-tr = @trace pow(2, Int)
+tr = @trace pow(2, ::Int)
 @test returntype(tr) == Int
 
-tr = @trace pow(2.0, Int)
+tr = @trace pow(2.0, ::Int)
 @test returntype(tr) == Union{Float64,Int}
 
-tr = @trace pow(1, Int)
+tr = @trace pow(1, ::Int)
 @test returntype(tr) == Const(1)
 
-tr = @trace bar(Int, Int)
+tr = @trace bar(::Int, ::Int)
 @test returntype(tr) == Int
 
 function foo(x)
@@ -93,7 +93,7 @@ end
 tr = @trace foo(1)
 @test returntype(tr) == Const(1)
 
-tr = @trace foo(Int)
+tr = @trace foo(::Int)
 @test returntype(tr) == Int
 
 function foo(x)
@@ -142,7 +142,7 @@ end
 tr = @trace pow(2, 3)
 @test returntype(tr) == Const(8)
 
-tr = @trace pow(Int, Int)
+tr = @trace pow(::Int, ::Int)
 @test returntype(tr) == Int
 
 function sumabs2(xs)
@@ -153,14 +153,26 @@ function sumabs2(xs)
   return s
 end
 
-tr = @trace sumabs2(arrayshape(Float64, 3))
+tr = @trace sumabs2(::arrayshape(Float64, 3))
 @test length(blocks(tr)) == 1
 @test returntype(tr) == Float64
 
 f(xs) = sum(xs)
-tr = @trace f(Matrix{Int32})
+tr = @trace f(::Matrix{Int32})
 @test returntype(tr) == Int32
 
 f(xs) = sum(xs, dims = 1)
-tr = @trace f(Matrix{Int32})
+tr = @trace f(::Matrix{Int32})
 @test returntype(tr) == Matrix{Int32}
+
+
+function negsquare(x)
+    if x > 0
+        return x^2
+    else
+        return -x^2
+    end
+end
+
+tr = @trace negsquare(::Float64)
+@test returntype(tr) == Float64
