@@ -211,7 +211,12 @@ function step!(inf::Inference)
 end
 
 function infer_stmt!(inf, frame, b, f, ip, block, var, st)
-  println(st)
+  if st.expr isa QuoteNode
+    block.ir[var] = stmt(block[var], type = Const(st.expr.value))
+    push!(inf.queue, (frame, b, f, ip+1))
+    return inf
+  end
+
   st.expr isa Expr || error("Unrecognised expression $(st.expr)")
   infer_stmt!(Val(st.expr.head), inf, frame, b, f, ip, block, var, st)
 end
