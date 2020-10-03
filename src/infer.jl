@@ -188,17 +188,7 @@ function step!(inf::Inference)
   if ip <= length(stmts)
     var = stmts[ip]
     st = block[var]
-    if isexpr(st.expr, :call)
-      T = infercall!(inf, (frame, b, f, ip), block, st.expr)
-      if T != Union{}
-        block.ir[var] = stmt(block[var], type = _union(st.type, T))
-        push!(inf.queue, (frame, b, f, ip+1))
-      end
-    elseif isexpr(st.expr, :inbounds)
-      push!(inf.queue, (frame, b, f, ip+1))
-    else
-      error("Unrecognised expression $(st.expr)")
-    end
+    infer_stmt!(inf, frame, b, f, ip, block, var, st)
   elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
           && !(brs[1].block == length(frame.ir.blocks)))
     inferbranch!(inf, frame, b, f, brs[1])
@@ -218,6 +208,29 @@ function step!(inf::Inference)
     end
   end
   return
+end
+
+function infer_stmt!(inf, frame, b, f, ip, block, var, st)
+  println(st)
+  st.expr isa Expr || error("Unrecognised expression $(st.expr)")
+  infer_stmt!(Val(st.expr.head), inf, frame, b, f, ip, block, var, st)
+end
+
+function infer_stmt!(::Val{:call}, inf, frame, b, f, ip, block, var, st)
+  T = infercall!(inf, (frame, b, f, ip), block, st.expr)
+  if T != Union{}
+    block.ir[var] = stmt(block[var], type = _union(st.type, T))
+    push!(inf.queue, (frame, b, f, ip+1))
+  end
+  return inf
+end
+
+function infer_stmt!(::Val{:inbounds}, inf, frame, b, f, ip, block, var, st)
+  push!(inf.queue, (frame, b, f, ip+1))
+end
+
+function infer_stmt!(::Val, inf, frame, b, f, ip, block, var, st)
+  error("Unrecognised expression $(st.expr)")
 end
 
 function infer!(inf::Inference)
