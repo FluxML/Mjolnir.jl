@@ -52,5 +52,4 @@ struct KwFunc{F} end
 
 @abstract Basic Core.kwfunc(::T) where T = Const(KwFunc{T}())
 
-instead(::Basic, args, ::AType{KwFunc{F}}, kw, f, xs...) where F =
-  args, (Core.kwftype(widen(f)), kw, f, xs...)
+instead(::Basic, args, ::AType{KwFunc{F}}, kw, f, xs...) where F = (args, (Core.kwftype(widen(f)), kw, f, xs...))
