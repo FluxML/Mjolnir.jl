@@ -1,6 +1,7 @@
 # Mjolnir
 
-[![Build Status](https://travis-ci.org/MikeInnes/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/MikeInnes/Mjolnir.jl)
+[![Build Status](https://travis-ci.org/FluxML/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/FluxML/Mjolnir.jl)
+[![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 
 Mjolnir is a hybrid approach to partial evaluation / abstract interpretation,
 with an implementation in Julia. It can be thought of as a blend of
