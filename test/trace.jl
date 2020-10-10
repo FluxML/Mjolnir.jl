@@ -145,14 +145,14 @@ tr = @trace pow(2, 3)
 tr = @trace pow(::Int, ::Int)
 @test returntype(tr) == Int
 
-function pow(x, n)
-    n == one(n)  && return x
-    n <= zero(n) && return zero(x)
-    return x*pow(x, n-1)
+function m(n)
+    for i in 1 : n
+        nothing
+    end
 end
 
-tr = @trace pow(Float64, Int)
-@test returntype(tr) == Float64
+tr = @trace m(::Int)
+@test returntype(tr) == Const(nothing)
 
 function sumabs2(xs)
   s = zero(eltype(xs))

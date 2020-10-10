@@ -188,6 +188,7 @@ function step!(inf::Inference)
     if ip <= length(stmts)
         var = stmts[ip]
         st = block[var]
+        st.expr isa QuoteNode && return
         if isexpr(st.expr, :call)
             T = infercall!(inf, (frame, b, f, ip), block, st.expr)
             if T != Union{}
@@ -196,7 +197,6 @@ function step!(inf::Inference)
             end
         elseif isexpr(st.expr, :inbounds)
             push!(inf.queue, (frame, b, f, ip+1))
-        elseif st.expr isa QuoteNode
         else
             error("Unrecognised expression $(st.expr)")
         end
