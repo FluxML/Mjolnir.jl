@@ -8,7 +8,11 @@ function inline_consts!(ir::IR)
   isused(x) = get(us, x, 0) > 0
   for v in reverse(keys(ir))
     st = ir[v]
-    effect = effectful(exprtype.((ir,), ir[v].expr.args)...)
+    if typeof(st.expr) == IRTools.Inner.Variable
+      effect = true
+    else
+      effect = effectful(exprtype.((ir,), ir[v].expr.args)...)
+    end
     if st.type isa Union{Const,Node} && !effect
       map(v -> v isa Variable && (us[v] -= 1), st.expr.args)
       if st.type isa Node || istrivial(st.type.value) || !isused(v)

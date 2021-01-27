@@ -196,6 +196,18 @@ function step!(inf::Inference)
       end
     elseif isexpr(st.expr, :inbounds)
       push!(inf.queue, (frame, b, f, ip+1))
+    elseif typeof(st.expr) == IRTools.Inner.Variable
+      if (i = findfirst(x -> x == st.expr, arguments(block))) != nothing
+        T = argtypes(block)[i]        
+      elseif st.expr in stmts
+        T = block.ir[st.expr].type
+      else 
+        error("Unrecognised variable $(st.expr)")
+      end
+      if T != Union{}
+        block.ir[var] = stmt(block[var], type = _union(st.type, T))
+        push!(inf.queue, (frame, b, f, ip+1))
+      end
     else
       error("Unrecognised expression $(st.expr)")
     end
