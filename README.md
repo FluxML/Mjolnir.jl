@@ -1,3 +1,5 @@
+⚠️ This project was experimental and is not currently maintained. It may be picked up at some point in the future, but for now it is both incomplete and likely non-functional on newer versions of Julia. For a discussion of why development has not continued, see [this thread](https://github.com/FluxML/Mjolnir.jl/pull/34#issuecomment-952526860).
+
 # Mjolnir
 
 [![Build Status](https://travis-ci.org/FluxML/Mjolnir.jl.svg?branch=master)](https://travis-ci.org/FluxML/Mjolnir.jl)
