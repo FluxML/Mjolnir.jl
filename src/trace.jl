@@ -15,7 +15,7 @@ function getir(tr::Trace, Ts...)
   m == nothing && return
   key = Base.isgenerated(m.method) ? Ts : (m.method, m.sparams)
   ir = get!(() -> IR(m, prune = false), tr.ircache, key)
-  return deepcopy(ir)
+  return copy(ir)
 end
 
 function node!(tr::Trace, T::Union{Partial,Shape}, v)
