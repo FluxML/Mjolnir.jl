@@ -182,70 +182,71 @@ function openbranches(bl)
 end
 
 function step!(inf::Inference)
-  frame, b, f, ip = pop!(inf.queue)
-  block, stmts = getblock(frame, b, f)
-  uninline!(frame, b, f)
-  if ip <= length(stmts)
-    var = stmts[ip]
-    st = block[var]
-    if isexpr(st.expr, :call)
-      T = infercall!(inf, (frame, b, f, ip), block, st.expr)
-      if T != Union{}
-        block.ir[var] = stmt(block[var], type = _union(st.type, T))
-        push!(inf.queue, (frame, b, f, ip+1))
-      end
-    elseif isexpr(st.expr, :inbounds)
-      push!(inf.queue, (frame, b, f, ip+1))
-    else
-      error("Unrecognised expression $(st.expr)")
-    end
-  elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
-          && !(brs[1].block == length(frame.ir.blocks)))
-    inferbranch!(inf, frame, b, f, brs[1])
-  else
-    for br in brs
-      if isreturn(br)
-        T = exprtype(block.ir, IRTools.returnvalue(block))
-        _issubtype(T, frame.rettype) && return
-        frame.rettype = _union(frame.rettype, T)
-        foreach(loc -> push!(inf.queue, loc), frame.edges)
-      else
-        args = exprtype.((block.ir,), arguments(br))
-        if blockargs!(IRTools.block(frame.ir, br.block), args)
-          push!(inf.queue, (frame, br.block, 0, 1))
+    frame, b, f, ip = pop!(inf.queue)
+    block, stmts = getblock(frame, b, f)
+    uninline!(frame, b, f)
+    if ip <= length(stmts)
+        var = stmts[ip]
+        st = block[var]
+        st.expr isa QuoteNode && return
+        if isexpr(st.expr, :call)
+            T = infercall!(inf, (frame, b, f, ip), block, st.expr)
+            if T != Union{}
+                block.ir[var] = stmt(block[var], type = _union(st.type, T))
+                push!(inf.queue, (frame, b, f, ip+1))
+            end
+        elseif isexpr(st.expr, :inbounds)
+            push!(inf.queue, (frame, b, f, ip+1))
+        else
+            error("Unrecognised expression $(st.expr)")
         end
-      end
+    elseif (brs = openbranches(block); length(brs) == 1 && !isreturn(brs[1])
+            && !(brs[1].block == length(frame.ir.blocks)))
+        inferbranch!(inf, frame, b, f, brs[1])
+    else
+        for br in brs
+            if isreturn(br)
+                T = exprtype(block.ir, IRTools.returnvalue(block))
+                _issubtype(T, frame.rettype) && return
+                frame.rettype = _union(frame.rettype, T)
+                foreach(loc -> push!(inf.queue, loc), frame.edges)
+            else
+                args = exprtype.((block.ir,), arguments(br))
+                if blockargs!(IRTools.block(frame.ir, br.block), args)
+                    push!(inf.queue, (frame, br.block, 0, 1))
+                end
+            end
+        end
     end
-  end
-  return
+    return
 end
 
 function infer!(inf::Inference)
-  while !isempty(inf.queue)
-    step!(inf)
-  end
-  for (_, fr) in inf.frames
-    inline_bbs!(fr)
-    fr.ir |> IRTools.Inner.trimblocks!
-  end
-  return inf
+    while !isempty(inf.queue)
+        step!(inf)
+    end
+    for (_, fr) in inf.frames
+        inline_bbs!(fr)
+        fr.ir |> IRTools.Inner.trimblocks!
+    end
+    return inf
 end
 
 function Inference(fr::Frame, P)
-  q = WorkQueue{Any}()
-  push!(q, (fr, 1, 0, 1))
-  Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict(), P)
+    q = WorkQueue{Any}()
+    push!(q, (fr, 1, 0, 1))
+    Inference(Dict(argtypes(fr.ir)=>fr), q, IdDict(), P)
 end
 
 function infer!(P, ir::IR, args...)
-  fr = frame(ir, args...)
-  inf = Inference(fr, P)
-  infer!(inf)
+    fr = frame(ir, args...)
+    inf = Inference(fr, P)
+    infer!(inf)
 end
 
 function return_type(ir::IR, args...)
-  fr = frame(copy(ir), args...)
-  inf = Inference(fr, Defaults())
-  infer!(inf)
-  return fr.rettype
+    fr = frame(copy(ir), args...)
+    inf = Inference(fr, Defaults())
+    infer!(inf)
+    return fr.rettype
 end

@@ -145,6 +145,15 @@ tr = @trace pow(2, 3)
 tr = @trace pow(::Int, ::Int)
 @test returntype(tr) == Int
 
+function m(n)
+    for i in 1 : n
+        nothing
+    end
+end
+
+tr = @trace m(::Int)
+@test returntype(tr) == Const(nothing)
+
 function sumabs2(xs)
   s = zero(eltype(xs))
   for i = 1:length(xs)
